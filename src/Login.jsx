@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Truck, Eye, EyeOff } from 'lucide-react';
+import { Truck, Eye, EyeOff, Package } from 'lucide-react';
 
 export default function Login({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -61,41 +61,47 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-orange-600 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <motion.div
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Header */}
+          {/* FedEx Header */}
           <div className="text-center">
-            <div className="flex justify-center">
-              <div className="bg-purple-600 p-3 rounded-full">
-                <Truck className="w-8 h-8 text-white" />
+            <div className="flex justify-center items-center space-x-4 mb-6">
+              <div className="bg-white p-4 rounded-xl shadow-2xl">
+                <Truck className="w-10 h-10 text-purple-800" />
+              </div>
+              <div className="bg-white p-4 rounded-xl shadow-2xl">
+                <Package className="w-10 h-10 text-orange-600" />
               </div>
             </div>
-            <h2 className="mt-6 text-3xl font-bold text-gray-900">
-              Courier Dashboard
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Fed<span className="text-orange-400">Ex</span>
+            </h1>
+            <h2 className="text-xl font-semibold text-purple-200">
+              Courier Operations Portal
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Sign in to access your dashboard
+            <p className="mt-3 text-sm text-purple-100">
+              Secure access to your logistics dashboard
             </p>
           </div>
 
-          {/* Login Form */}
+          {/* Enhanced Login Form */}
           <motion.form
-            className="mt-8 space-y-6"
+            className="mt-8 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8"
             onSubmit={handleSubmit}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <div className="rounded-md shadow-sm space-y-4">
+            <div className="space-y-6">
               {/* Username Field */}
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
+                <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Employee ID / Username
                 </label>
                 <input
                   id="username"
@@ -105,15 +111,15 @@ export default function Login({ onLogin }) {
                   required
                   value={formData.username}
                   onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                  placeholder="Enter your username"
+                  className="appearance-none relative block w-full px-4 py-3 border-2 border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all sm:text-sm font-medium"
+                  placeholder="Enter your employee ID"
                 />
               </div>
 
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Security Password
                 </label>
                 <div className="relative">
                   <input
@@ -124,18 +130,18 @@ export default function Login({ onLogin }) {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-                    placeholder="Enter your password"
+                    className="appearance-none relative block w-full px-4 py-3 pr-12 border-2 border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all sm:text-sm font-medium"
+                    placeholder="Enter your secure password"
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center hover:bg-gray-50 rounded-r-xl transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
+                      <EyeOff className="h-5 w-5 text-gray-500" />
                     ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
+                      <Eye className="h-5 w-5 text-gray-500" />
                     )}
                   </button>
                 </div>
@@ -143,18 +149,26 @@ export default function Login({ onLogin }) {
             </div>
 
             {/* Remember Me Checkbox */}
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                Remember me for today
-              </label>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 font-medium">
+                  Remember me for today
+                </label>
+              </div>
+              <button 
+                onClick={() => {/* Handle forgot password */}} 
+                className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+              >
+                Forgot password?
+              </button>
             </div>
 
             {/* Error Message */}
@@ -162,30 +176,46 @@ export default function Login({ onLogin }) {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm"
+                className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg text-sm font-medium"
               >
-                {error}
+                <div className="flex items-center">
+                  <span className="font-semibold">Authentication Failed:</span>
+                  <span className="ml-1">{error}</span>
+                </div>
               </motion.div>
             )}
 
-            {/* Submit Button */}
+            {/* Enhanced Submit Button */}
             <div>
               <motion.button
                 type="submit"
                 disabled={isLoading}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-4 px-6 border border-transparent text-base font-bold rounded-xl text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transition-all"
               >
                 {isLoading ? (
                   <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Signing in...
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                    Authenticating...
                   </div>
                 ) : (
-                  'Sign in'
+                  <div className="flex items-center">
+                    <span>Secure Login</span>
+                    <Truck className="ml-2 w-5 h-5" />
+                  </div>
                 )}
               </motion.button>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center pt-4 border-t border-gray-200">
+              <p className="text-xs text-gray-500">
+                © 2025 FedEx Corporation. All rights reserved.
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Secure access to FedEx courier operations
+              </p>
             </div>
           </motion.form>
         </motion.div>

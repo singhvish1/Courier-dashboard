@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { MapPin, BarChart3, Users, Truck, LogOut } from "lucide-react";
-import { motion } from "framer-motion";
 import { 
   BarChart, 
   Bar, 
@@ -21,34 +20,43 @@ export default function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('route');
   
   return (
-    <div className="p-6 grid gap-6 bg-gray-50 min-h-screen">
-      {/* Header Section */}
-      <header className="flex justify-between items-center bg-white p-4 rounded-lg shadow">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Truck className="text-purple-600" /> Courier Dashboard
-        </h1>
+    <div className="p-6 grid gap-6 bg-gradient-to-br from-purple-50 to-orange-50 min-h-screen">
+      {/* Header Section - FedEx Themed */}
+      <header className="flex justify-between items-center bg-gradient-to-r from-purple-800 to-purple-900 p-6 rounded-xl shadow-xl">
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600">Welcome, {user}</span>
-          <select className="px-3 py-2 border rounded-md bg-white">
-            <option>Division</option>
-            <option value="east">Surface</option>
+          <div className="bg-white p-2 rounded-lg">
+            <Truck className="text-purple-800 w-8 h-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-white">FedEx</h1>
+            <p className="text-purple-200 text-sm">Courier Operations Dashboard</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg">
+            <span className="text-white font-medium">Welcome, {user}</span>
+          </div>
+          <select className="px-3 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white">
+            <option className="text-black">Division</option>
+            <option className="text-black" value="surface">Surface</option>
+            <option className="text-black" value="express">Express</option>
           </select>
-          <select className="px-3 py-2 border rounded-md bg-white">
-            <option>Region</option>
-            <option value="north">North Region</option>
-            <option value="south">South Region</option>
+          <select className="px-3 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white">
+            <option className="text-black">Region</option>
+            <option className="text-black" value="north">North Region</option>
+            <option className="text-black" value="south">South Region</option>
           </select>
-          <select className="px-3 py-2 border rounded-md bg-white">
-            <option>Location</option>
-            <option value="hub1">Hub 1</option>
-            <option value="hub2">Hub 2</option>
+          <select className="px-3 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white">
+            <option className="text-black">Location</option>
+            <option className="text-black" value="hub1">Distribution Hub 1</option>
+            <option className="text-black" value="hub2">Distribution Hub 2</option>
           </select>
-          <button className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+          <button className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold transition-colors shadow-lg">
             Export CSV
           </button>
           <button 
             onClick={onLogout}
-            className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center gap-2"
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2 transition-colors shadow-lg"
             title="Logout"
           >
             <LogOut className="w-4 h-4" />
@@ -57,61 +65,70 @@ export default function Dashboard({ user, onLogout }) {
         </div>
       </header>
 
-      {/* KPI Cards - Truly Horizontal Layout */}
-      <section className="bg-white rounded-lg shadow p-4">
+      {/* KPI Cards - FedEx Themed Horizontal Layout */}
+      <section className="bg-white rounded-xl shadow-xl p-6 border-l-4 border-purple-800">
+        <div className="mb-4">
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+            Key Performance Indicators
+          </h2>
+        </div>
         <div className="flex items-center justify-between space-x-8">
           {[
-            { label: "Route Compliance", value: "92%", icon: BarChart3, color: "bg-green-100 text-green-600" },
-            { label: "Scan Compliance", value: "88%", icon: MapPin, color: "bg-blue-100 text-blue-600" },
-            { label: "Average Stops / Hr", value: "11.2", icon: Truck, color: "bg-orange-100 text-orange-600" },
-            { label: "Active Couriers", value: "27", icon: Users, color: "bg-purple-100 text-purple-600" },
+            { label: "Route Compliance", value: "92%", icon: BarChart3, color: "bg-green-100 text-green-700", bgGradient: "from-green-500 to-green-600" },
+            { label: "Scan Compliance", value: "88%", icon: MapPin, color: "bg-blue-100 text-blue-700", bgGradient: "from-blue-500 to-blue-600" },
+            { label: "Average Stops / Hr", value: "11.2", icon: Truck, color: "bg-orange-100 text-orange-700", bgGradient: "from-orange-500 to-orange-600" },
+            { label: "Active Couriers", value: "27", icon: Users, color: "bg-purple-100 text-purple-700", bgGradient: "from-purple-500 to-purple-600" },
           ].map((kpi, index) => (
-            <div key={kpi.label} className="flex items-center space-x-3">
-              <div className={`p-2 rounded-lg ${kpi.color.split(' ')[0]} ${kpi.color.split(' ')[1]}`}>
-                <kpi.icon className="w-5 h-5" />
+            <div key={kpi.label} className="flex items-center space-x-4 group hover:scale-105 transition-transform">
+              <div className={`p-3 rounded-xl bg-gradient-to-br ${kpi.bgGradient} shadow-lg`}>
+                <kpi.icon className="w-6 h-6 text-white" />
               </div>
               <div className="flex items-baseline space-x-2">
-                <span className="text-sm font-medium text-gray-600">{kpi.label}:</span>
-                <span className="text-2xl font-bold text-gray-900">{kpi.value}</span>
+                <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{kpi.label}:</span>
+                <span className="text-3xl font-bold text-gray-900 group-hover:text-purple-800 transition-colors">{kpi.value}</span>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Tabs for Route and Scan Compliance */}
-      <div className="mt-4">
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+      {/* Tabs for Route and Scan Compliance - FedEx Themed */}
+      <div className="mt-6">
+        <div className="flex space-x-1 bg-gradient-to-r from-purple-100 to-orange-100 p-1 rounded-xl w-fit shadow-lg">
           <button
             onClick={() => setActiveTab('route')}
-            className={`px-4 py-2 rounded-md ${
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
               activeTab === 'route' 
-                ? 'bg-white text-purple-600 shadow' 
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg transform scale-105' 
+                : 'text-purple-700 hover:text-purple-900 hover:bg-white/50'
             }`}
           >
             Route Compliance
           </button>
           <button
             onClick={() => setActiveTab('scan')}
-            className={`px-4 py-2 rounded-md ${
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
               activeTab === 'scan' 
-                ? 'bg-white text-purple-600 shadow' 
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg transform scale-105' 
+                : 'text-orange-700 hover:text-orange-900 hover:bg-white/50'
             }`}
           >
             Scan Compliance
           </button>
         </div>
 
-        {/* Route Compliance Summary */}
+        {/* Route Compliance Summary - FedEx Themed */}
         {activeTab === 'route' && (
           <>
-            <div className="bg-white mt-4 rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold mb-4">Route Performance Summary</h3>
+            <div className="bg-white mt-6 rounded-xl shadow-xl p-8 border-l-4 border-purple-600">
+              <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+                <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full"></div>
+                Route Performance Summary
+              </h3>
               <div className="flex items-center justify-between space-x-6">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <div className="flex items-center space-x-3 bg-green-50 p-4 rounded-xl">
+                  <div className="w-4 h-4 bg-green-500 rounded-full shadow-lg"></div>
                   <div>
                     <span className="text-sm text-gray-600">On Route:</span>
                     <span className="ml-2 text-lg font-bold text-green-600">3 couriers (60%)</span>
