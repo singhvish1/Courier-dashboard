@@ -1,8 +1,23 @@
 import React, { useState } from 'react';
-import { MapPin, BarChart3, Users, Truck } from "lucide-react";
+import { MapPin, BarChart3, Users, Truck, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Legend
+} from 'recharts';
 
-export default function CourierDashboardWireframe() {
+export default function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('route');
   
   return (
@@ -12,7 +27,8 @@ export default function CourierDashboardWireframe() {
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Truck className="text-purple-600" /> Courier Dashboard
         </h1>
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-600">Welcome, {user}</span>
           <select className="px-3 py-2 border rounded-md bg-white">
             <option>Division</option>
             <option value="east">Surface</option>
@@ -30,39 +46,38 @@ export default function CourierDashboardWireframe() {
           <button className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
             Export CSV
           </button>
+          <button 
+            onClick={onLogout}
+            className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center gap-2"
+            title="Logout"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
         </div>
       </header>
 
-      {/* KPI Bar — horizontal, compact, scrollable */}
-      <section aria-label="Key metrics" className="mt-2 -mx-6 px-6">
-        <div className="flex items-stretch gap-4 overflow-x-auto no-scrollbar py-1">
+      {/* KPI Cards - Truly Horizontal Layout */}
+      <section className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center justify-between space-x-8">
           {[
-            { label: "Route Compliance", value: "92%", icon: BarChart3 },
-            { label: "Scan Compliance", value: "88%", icon: MapPin },
-            { label: "Average Stops / Hr", value: "11.2", icon: Truck },
-            { label: "Active Couriers", value: "3", icon: Users },
-          ].map((kpi) => (
-            <motion.div
-              key={kpi.label}
-              whileHover={{ scale: 1.02 }}
-              className="shrink-0"
-            >
-              <div className="bg-white px-5 py-3 rounded-xl shadow-sm flex items-center gap-3 min-w-[230px]">
-                <kpi.icon className="w-5 h-5 text-purple-600" aria-hidden="true" />
-                <div className="flex items-baseline gap-2">
-                  <span className="text-sm text-gray-600 whitespace-nowrap">
-                    {kpi.label}
-                  </span>
-                  <span className="text-2xl font-bold text-gray-900">
-                    {kpi.value}
-                  </span>
-                </div>
+            { label: "Route Compliance", value: "92%", icon: BarChart3, color: "bg-green-100 text-green-600" },
+            { label: "Scan Compliance", value: "88%", icon: MapPin, color: "bg-blue-100 text-blue-600" },
+            { label: "Average Stops / Hr", value: "11.2", icon: Truck, color: "bg-orange-100 text-orange-600" },
+            { label: "Active Couriers", value: "27", icon: Users, color: "bg-purple-100 text-purple-600" },
+          ].map((kpi, index) => (
+            <div key={kpi.label} className="flex items-center space-x-3">
+              <div className={`p-2 rounded-lg ${kpi.color.split(' ')[0]} ${kpi.color.split(' ')[1]}`}>
+                <kpi.icon className="w-5 h-5" />
               </div>
-            </motion.div>
+              <div className="flex items-baseline space-x-2">
+                <span className="text-sm font-medium text-gray-600">{kpi.label}:</span>
+                <span className="text-2xl font-bold text-gray-900">{kpi.value}</span>
+              </div>
+            </div>
           ))}
         </div>
       </section>
-
 
       {/* Tabs for Route and Scan Compliance */}
       <div className="mt-4">
@@ -223,11 +238,11 @@ export default function CourierDashboardWireframe() {
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-green-100 text-green-700 rounded">A</span>
-                          <span>18m</span>
+                          <span>12m</span>
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-orange-100 text-orange-700 rounded">V</span>
-                          <span className="text-red-600">+3m</span>
+                          <span className="text-green-600">-3m</span>
                         </div>
                       </div>
                     </td>
@@ -235,15 +250,15 @@ export default function CourierDashboardWireframe() {
                       <div className="text-xs space-y-1">
                         <div className="flex space-x-1">
                           <span className="px-1 bg-blue-100 text-blue-700 rounded">P</span>
-                          <span>3m</span>
-                        </div>
-                        <div className="flex space-x-1">
-                          <span className="px-1 bg-green-100 text-green-700 rounded">A</span>
                           <span>4m</span>
                         </div>
                         <div className="flex space-x-1">
+                          <span className="px-1 bg-green-100 text-green-700 rounded">A</span>
+                          <span>3m</span>
+                        </div>
+                        <div className="flex space-x-1">
                           <span className="px-1 bg-orange-100 text-orange-700 rounded">V</span>
-                          <span className="text-red-600">+1m</span>
+                          <span className="text-green-600">-1m</span>
                         </div>
                       </div>
                     </td>
@@ -255,11 +270,11 @@ export default function CourierDashboardWireframe() {
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-green-100 text-green-700 rounded">A</span>
-                          <span>7m</span>
+                          <span>4m</span>
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-orange-100 text-orange-700 rounded">V</span>
-                          <span className="text-red-600">+2m</span>
+                          <span className="text-green-600">-1m</span>
                         </div>
                       </div>
                     </td>
@@ -267,20 +282,20 @@ export default function CourierDashboardWireframe() {
                       <div className="text-xs space-y-1">
                         <div className="flex space-x-1">
                           <span className="px-1 bg-blue-100 text-blue-700 rounded">P</span>
-                          <span>12.0</span>
+                          <span>11.5</span>
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-green-100 text-green-700 rounded">A</span>
-                          <span>10.8</span>
+                          <span>12.2</span>
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-orange-100 text-orange-700 rounded">V</span>
-                          <span className="text-red-600">-1.2</span>
+                          <span className="text-green-600">+0.7</span>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-2">
-                      <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">Off Route</span>
+                      <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">✓ On Route</span>
                     </td>
                   </tr>
                   <tr className="border-b hover:bg-gray-50">
@@ -301,18 +316,34 @@ export default function CourierDashboardWireframe() {
                     </td>
                     <td className="py-3 px-2 text-center">
                       <div className="text-xs">
-                        <div>P:5 | D:3</div>
+                        <div>P:3 | D:0</div>
                       </div>
                     </td>
                     <td className="py-3 px-2">
                       <div className="text-xs space-y-1">
                         <div className="flex space-x-1">
                           <span className="px-1 bg-blue-100 text-blue-700 rounded">P</span>
-                          <span>8:00</span>
+                          <span>9:30</span>
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-green-100 text-green-700 rounded">A</span>
-                          <span>7:58</span>
+                          <span>9:25</span>
+                        </div>
+                        <div className="flex space-x-1">
+                          <span className="px-1 bg-orange-100 text-orange-700 rounded">V</span>
+                          <span className="text-green-600">-5m</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-2">
+                      <div className="text-xs space-y-1">
+                        <div className="flex space-x-1">
+                          <span className="px-1 bg-blue-100 text-blue-700 rounded">P</span>
+                          <span>10m</span>
+                        </div>
+                        <div className="flex space-x-1">
+                          <span className="px-1 bg-green-100 text-green-700 rounded">A</span>
+                          <span>8m</span>
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-orange-100 text-orange-700 rounded">V</span>
@@ -324,27 +355,11 @@ export default function CourierDashboardWireframe() {
                       <div className="text-xs space-y-1">
                         <div className="flex space-x-1">
                           <span className="px-1 bg-blue-100 text-blue-700 rounded">P</span>
-                          <span>12m</span>
+                          <span>6m</span>
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-green-100 text-green-700 rounded">A</span>
-                          <span>11m</span>
-                        </div>
-                        <div className="flex space-x-1">
-                          <span className="px-1 bg-orange-100 text-orange-700 rounded">V</span>
-                          <span className="text-green-600">-1m</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-2">
-                      <div className="text-xs space-y-1">
-                        <div className="flex space-x-1">
-                          <span className="px-1 bg-blue-100 text-blue-700 rounded">P</span>
                           <span>5m</span>
-                        </div>
-                        <div className="flex space-x-1">
-                          <span className="px-1 bg-green-100 text-green-700 rounded">A</span>
-                          <span>4m</span>
                         </div>
                         <div className="flex space-x-1">
                           <span className="px-1 bg-orange-100 text-orange-700 rounded">V</span>
@@ -496,6 +511,75 @@ export default function CourierDashboardWireframe() {
                 </tbody>
               </table>
             </div>
+
+            {/* Route Compliance Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              {/* Courier Performance Chart */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h4 className="text-lg font-semibold mb-4">Courier Performance Comparison</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={[
+                    { name: 'John D.', planned: 11.5, actual: 10.8, variance: -0.7 },
+                    { name: 'Amanda L.', planned: 11.5, actual: 12.2, variance: 0.7 },
+                    { name: 'Mike S.', planned: 13.2, actual: 14.1, variance: 0.9 }
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis label={{ value: 'Stops per Hour', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip formatter={(value, name) => [value, name === 'planned' ? 'Planned' : name === 'actual' ? 'Actual' : 'Variance']} />
+                    <Legend />
+                    <Bar dataKey="planned" fill="#3b82f6" name="Planned" />
+                    <Bar dataKey="actual" fill="#10b981" name="Actual" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Route Compliance Status */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h4 className="text-lg font-semibold mb-4">Route Compliance Status</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'On Route', value: 2, color: '#10b981' },
+                        { name: 'Off Route', value: 1, color: '#f59e0b' }
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      <Cell fill="#10b981" />
+                      <Cell fill="#f59e0b" />
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Time Variance Trend */}
+              <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                <h4 className="text-lg font-semibold mb-4">Time Variance Analysis</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={[
+                    { courier: 'John D.', leaveBuilding: 5, toArea: 3, stopDuration: 1, betweenStops: 2 },
+                    { courier: 'Amanda L.', leaveBuilding: -5, toArea: -2, stopDuration: -1, betweenStops: -1 },
+                    { courier: 'Mike S.', leaveBuilding: -3, toArea: -2, stopDuration: 0, betweenStops: -1 }
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="courier" />
+                    <YAxis label={{ value: 'Time Variance (minutes)', angle: -90, position: 'insideLeft' }} />
+                    <Tooltip formatter={(value) => [`${value > 0 ? '+' : ''}${value} min`, 'Variance']} />
+                    <Legend />
+                    <Line type="monotone" dataKey="leaveBuilding" stroke="#3b82f6" name="Leave Building" strokeWidth={2} />
+                    <Line type="monotone" dataKey="toArea" stroke="#10b981" name="To Area Duration" strokeWidth={2} />
+                    <Line type="monotone" dataKey="stopDuration" stroke="#f59e0b" name="Stop Duration" strokeWidth={2} />
+                    <Line type="monotone" dataKey="betweenStops" stroke="#ef4444" name="Between Stops" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
           </>
         )}
@@ -612,28 +696,6 @@ export default function CourierDashboardWireframe() {
                       <td className="py-3 px-2 text-sm">10/16/25</td>
                       <td className="py-3 px-2">
                         <div className="flex items-center space-x-2">
-                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                            <span className="text-green-600 font-semibold text-sm">AL</span>
-                          </div>
-                          <span>Amanda L.</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-2 font-mono">R202</td>
-                      <td className="py-3 px-2">8</td>
-                      <td className="py-3 px-2 text-sm">456 Oak Ave, City</td>
-                      <td className="py-3 px-2 font-mono text-sm">1Z999AA1234567891</td>
-                      <td className="py-3 px-2">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-mono">PUP</span>
-                      </td>
-                      <td className="py-3 px-2 text-red-600 font-semibold">290</td>
-                      <td className="py-3 px-2">
-                        <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">✗ Non-compliant</span>
-                      </td>
-                    </tr>
-                    <tr className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-2 text-sm">10/16/25</td>
-                      <td className="py-3 px-2">
-                        <div className="flex items-center space-x-2">
                           <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 font-semibold text-sm">MS</span>
                           </div>
@@ -641,8 +703,30 @@ export default function CourierDashboardWireframe() {
                         </div>
                       </td>
                       <td className="py-3 px-2 font-mono">R303</td>
-                      <td className="py-3 px-2">15</td>
+                      <td className="py-3 px-2">8</td>
                       <td className="py-3 px-2 text-sm">789 Pine Rd, City</td>
+                      <td className="py-3 px-2 font-mono text-sm">1Z999AA1234567891</td>
+                      <td className="py-3 px-2">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-mono">PUP</span>
+                      </td>
+                      <td className="py-3 px-2 text-green-600 font-semibold">95</td>
+                      <td className="py-3 px-2">
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">✓ Compliant</span>
+                      </td>
+                    </tr>
+                    <tr className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-2 text-sm">10/16/25</td>
+                      <td className="py-3 px-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                            <span className="text-green-600 font-semibold text-sm">AL</span>
+                          </div>
+                          <span>Amanda L.</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-2 font-mono">R202</td>
+                      <td className="py-3 px-2">15</td>
+                      <td className="py-3 px-2 text-sm">456 Oak Ave, City</td>
                       <td className="py-3 px-2 font-mono text-sm">1Z999AA1234567892</td>
                       <td className="py-3 px-2">
                         <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs font-mono">DDEX</span>
@@ -720,6 +804,103 @@ export default function CourierDashboardWireframe() {
                     </tr>
                   </tbody>
                 </table>
+              </div>
+
+              {/* Scan Compliance Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                {/* Scan Distance Analysis */}
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h4 className="text-lg font-semibold mb-4">Scan Distance Distribution</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={[
+                      { range: '0-100ft', count: 2, compliance: 'Compliant' },
+                      { range: '100-200ft', count: 2, compliance: 'Compliant' },
+                      { range: '200-250ft', count: 1, compliance: 'Compliant' },
+                      { range: '250ft+', count: 1, compliance: 'Non-compliant' }
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="range" />
+                      <YAxis label={{ value: 'Number of Scans', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip formatter={(value, name) => [value, 'Scan Count']} />
+                      <Bar dataKey="count" fill="#3b82f6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Scan Type Distribution */}
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h4 className="text-lg font-semibold mb-4">Scan Type Distribution</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'POD (Delivery)', value: 2, color: '#10b981' },
+                          { name: 'PUP (Pickup)', value: 1, color: '#3b82f6' },
+                          { name: 'DDEX (Delivered Exception)', value: 1, color: '#f59e0b' },
+                          { name: 'DEX (Exception)', value: 1, color: '#ef4444' },
+                          { name: 'PUX (Pickup Exception)', value: 1, color: '#8b5cf6' }
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name.split('(')[0]} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        <Cell fill="#10b981" />
+                        <Cell fill="#3b82f6" />
+                        <Cell fill="#f59e0b" />
+                        <Cell fill="#ef4444" />
+                        <Cell fill="#8b5cf6" />
+                      </Pie>
+                      <Tooltip formatter={(value) => [value, 'Scans']} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Courier Scan Performance */}
+                <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                  <h4 className="text-lg font-semibold mb-4">Courier Scan Performance</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={[
+                      { courier: 'John D.', compliantScans: 2, distance: 210, avgDistance: 210 },
+                      { courier: 'Mike S.', compliantScans: 1, distance: 95, avgDistance: 95 },
+                      { courier: 'Amanda L.', compliantScans: 1, distance: 45, avgDistance: 45 },
+                      { courier: 'Lisa H.', compliantScans: 0, distance: 310, avgDistance: 310 },
+                      { courier: 'Tom R.', compliantScans: 1, distance: 125, avgDistance: 125 }
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="courier" />
+                      <YAxis yAxisId="left" label={{ value: 'Compliant Scans', angle: -90, position: 'insideLeft' }} />
+                      <YAxis yAxisId="right" orientation="right" label={{ value: 'Avg Distance (ft)', angle: 90, position: 'insideRight' }} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar yAxisId="left" dataKey="compliantScans" fill="#10b981" name="Compliant Scans" />
+                      <Line yAxisId="right" type="monotone" dataKey="avgDistance" stroke="#ef4444" strokeWidth={3} name="Avg Distance (ft)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Compliance Trend */}
+                <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
+                  <h4 className="text-lg font-semibold mb-4">Daily Compliance Trend</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={[
+                      { date: 'Oct 14', routeCompliance: 85, scanCompliance: 82 },
+                      { date: 'Oct 15', routeCompliance: 88, scanCompliance: 85 },
+                      { date: 'Oct 16', routeCompliance: 92, scanCompliance: 88 },
+                      { date: 'Oct 17', routeCompliance: 90, scanCompliance: 90 },
+                      { date: 'Oct 18', routeCompliance: 94, scanCompliance: 87 }
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis label={{ value: 'Compliance %', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip formatter={(value) => [`${value}%`, 'Compliance']} />
+                      <Legend />
+                      <Line type="monotone" dataKey="routeCompliance" stroke="#3b82f6" strokeWidth={3} name="Route Compliance" />
+                      <Line type="monotone" dataKey="scanCompliance" stroke="#10b981" strokeWidth={3} name="Scan Compliance" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
           </>
