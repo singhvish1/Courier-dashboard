@@ -13,16 +13,17 @@ export default function CourierDashboardWireframe() {
           <Truck className="text-purple-600" /> Courier Dashboard
         </h1>
         <div className="flex gap-3">
-          <select className="px-3 py-2 border rounded-md bg-white">
-            <option>Division</option>
-            <option value="east">Surface</option>
+          <select className="px-4 py-2 border-2 border-purple-200 rounded-lg bg-white text-gray-700 font-medium hover:border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none transition-all shadow-sm">
+            <option value="surface">Surface</option>
           </select>
-          <select className="px-3 py-2 border rounded-md bg-white">
+          <select className="px-4 py-2 border-2 border-purple-200 rounded-lg bg-white text-gray-700 font-medium hover:border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none transition-all shadow-sm">
             <option>Region</option>
             <option value="north">North Region</option>
             <option value="south">South Region</option>
+            <option value="east">East Region</option>
+            <option value="west">West Region</option>
           </select>
-          <select className="px-3 py-2 border rounded-md bg-white">
+          <select className="px-4 py-2 border-2 border-purple-200 rounded-lg bg-white text-gray-700 font-medium hover:border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 focus:outline-none transition-all shadow-sm">
             <option>Location</option>
             <option value="hub1">Hub 1</option>
             <option value="hub2">Hub 2</option>

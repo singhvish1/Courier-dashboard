@@ -39,12 +39,13 @@ export default function Dashboard({ user, onLogout }) {
           <select className="px-3 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white">
             <option className="text-black">Division</option>
             <option className="text-black" value="surface">Surface</option>
-            <option className="text-black" value="express">Express</option>
           </select>
           <select className="px-3 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white">
             <option className="text-black">Region</option>
             <option className="text-black" value="north">North Region</option>
             <option className="text-black" value="south">South Region</option>
+            <option className="text-black" value="east">East Region</option>
+            <option className="text-black" value="west">West Region</option>
           </select>
           <select className="px-3 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white">
             <option className="text-black">Location</option>
