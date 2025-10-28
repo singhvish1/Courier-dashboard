@@ -411,33 +411,106 @@ export default function Dashboard({ user, onLogout }) {
                     <thead>
                       <tr className="border-b bg-gray-50">
                         <th className="text-left py-3 px-2 font-medium text-gray-600">Date</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Courier</th>
                         <th className="text-left py-3 px-2 font-medium text-gray-600">Route #</th>
                         <th className="text-left py-3 px-2 font-medium text-gray-600">Stop #</th>
                         <th className="text-left py-3 px-2 font-medium text-gray-600">Address</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Type</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Packages</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Leave Building</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">To Area Duration</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Stop Duration</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Between Stops</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Stops/Hr</th>
                         <th className="text-left py-3 px-2 font-medium text-gray-600">Compliance</th>
                       </tr>
                     </thead>
                     <tbody>
                       {routeData.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="py-4 text-center text-gray-500">No route records for your account.</td>
+                          <td colSpan={13} className="py-4 text-center text-gray-500">No route records for your account.</td>
                         </tr>
                       ) : (
-                        routeData.map((r, idx) => (
-                          <tr key={idx} className="border-b hover:bg-gray-50">
-                            <td className="py-3 px-2 text-sm">{r.date}</td>
-                            <td className="py-3 px-2 font-mono">{r.route}</td>
-                            <td className="py-3 px-2">{r.stop}</td>
-                            <td className="py-3 px-2 text-sm">{r.address}</td>
-                            <td className="py-3 px-2">
-                              {r.compliance.includes('✓') ? (
-                                <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">{r.compliance}</span>
-                              ) : (
-                                <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">{r.compliance}</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))
+                        routeData.map((r, idx) => {
+                          const isCompliant = r.compliance.includes('✓');
+                          const isCommercial = /Ave|Blvd|Ct|Plaza|Center/i.test(r.address);
+                          const pkgPlanned = (r.stop % 3) + 1;
+                          const pkgDelivered = Math.max(0, pkgPlanned - (isCompliant ? 0 : 1));
+                          // Durations (minutes) mock
+                          const pToArea = 10 + (idx % 6);
+                          const aToArea = pToArea + (isCompliant ? -1 : 2);
+                          const pStop = 5 + (idx % 4);
+                          const aStop = pStop + (isCompliant ? -1 : 1);
+                          const pBetween = 4 + (idx % 3);
+                          const aBetween = pBetween + (isCompliant ? -1 : 1);
+                          const pSph = 11.0 + ((idx % 5) * 0.3);
+                          const aSph = pSph + (isCompliant ? 0.7 : -0.5);
+                          const fmtVar = (v, unit = 'm') => (v > 0 ? `+${v}${unit}` : `${v}${unit}`);
+                          return (
+                            <tr key={idx} className="border-b hover:bg-gray-50">
+                              <td className="py-3 px-2 text-sm">{r.date}</td>
+                              <td className="py-3 px-2">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <span className="text-gray-700 font-semibold text-sm">{r.courierId}</span>
+                                  </div>
+                                  <span>{r.courierName}</span>
+                                </div>
+                              </td>
+                              <td className="py-3 px-2 font-mono">{r.route}</td>
+                              <td className="py-3 px-2">{r.stop}</td>
+                              <td className="py-3 px-2 text-sm">{r.address}</td>
+                              <td className="py-3 px-2">
+                                <span className={`px-2 py-1 rounded text-xs ${isCommercial ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{isCommercial ? 'COM' : 'RES'}</span>
+                              </td>
+                              <td className="py-3 px-2 text-center">
+                                <div className="text-xs">P:{pkgPlanned} | D:{pkgDelivered}</div>
+                              </td>
+                              <td className="py-3 px-2">
+                                <div className="text-xs space-y-1">
+                                  <div className="flex space-x-1"><span className="px-1 bg-blue-100 text-blue-700 rounded">P</span><span>8:00</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-green-100 text-green-700 rounded">A</span><span>8:05</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-orange-100 text-orange-700 rounded">V</span><span className={`${isCompliant ? 'text-green-600' : 'text-red-600'}`}>{isCompliant ? '-5m' : '+5m'}</span></div>
+                                </div>
+                              </td>
+                              <td className="py-3 px-2">
+                                <div className="text-xs space-y-1">
+                                  <div className="flex space-x-1"><span className="px-1 bg-blue-100 text-blue-700 rounded">P</span><span>{pToArea}m</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-green-100 text-green-700 rounded">A</span><span>{aToArea}m</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-orange-100 text-orange-700 rounded">V</span><span className={`${aToArea - pToArea <= 0 ? 'text-green-600' : 'text-red-600'}`}>{fmtVar(aToArea - pToArea)}</span></div>
+                                </div>
+                              </td>
+                              <td className="py-3 px-2">
+                                <div className="text-xs space-y-1">
+                                  <div className="flex space-x-1"><span className="px-1 bg-blue-100 text-blue-700 rounded">P</span><span>{pStop}m</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-green-100 text-green-700 rounded">A</span><span>{aStop}m</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-orange-100 text-orange-700 rounded">V</span><span className={`${aStop - pStop <= 0 ? 'text-green-600' : 'text-red-600'}`}>{fmtVar(aStop - pStop)}</span></div>
+                                </div>
+                              </td>
+                              <td className="py-3 px-2">
+                                <div className="text-xs space-y-1">
+                                  <div className="flex space-x-1"><span className="px-1 bg-blue-100 text-blue-700 rounded">P</span><span>{pBetween}m</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-green-100 text-green-700 rounded">A</span><span>{aBetween}m</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-orange-100 text-orange-700 rounded">V</span><span className={`${aBetween - pBetween <= 0 ? 'text-green-600' : 'text-red-600'}`}>{fmtVar(aBetween - pBetween)}</span></div>
+                                </div>
+                              </td>
+                              <td className="py-3 px-2">
+                                <div className="text-xs space-y-1">
+                                  <div className="flex space-x-1"><span className="px-1 bg-blue-100 text-blue-700 rounded">P</span><span>{pSph.toFixed(1)}</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-green-100 text-green-700 rounded">A</span><span>{aSph.toFixed(1)}</span></div>
+                                  <div className="flex space-x-1"><span className="px-1 bg-orange-100 text-orange-700 rounded">V</span><span className={`${aSph - pSph >= 0 ? 'text-green-600' : 'text-red-600'}`}>{fmtVar((aSph - pSph).toFixed(1), '')}</span></div>
+                                </div>
+                              </td>
+                              <td className="py-3 px-2">
+                                {isCompliant ? (
+                                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">{r.compliance}</span>
+                                ) : (
+                                  <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">{r.compliance}</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
