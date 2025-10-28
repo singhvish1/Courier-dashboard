@@ -18,8 +18,15 @@ function App() {
       
       if (now < expirationTime) {
         // User session is still valid
-        setUser(savedUser);
-        setIsLoggedIn(true);
+        try {
+          const userObj = JSON.parse(savedUser);
+          setUser(userObj);
+          setIsLoggedIn(true);
+        } catch (error) {
+          // Handle legacy string format
+          setUser({ displayName: savedUser, role: 'admin', courierId: null });
+          setIsLoggedIn(true);
+        }
       } else {
         // Session expired, clear storage
         localStorage.removeItem('courierUser');
@@ -28,12 +35,12 @@ function App() {
     }
   }, []);
 
-  const handleLogin = (username, rememberMe = false) => {
-    setUser(username);
+  const handleLogin = (userObj, rememberMe = false) => {
+    setUser(userObj);
     setIsLoggedIn(true);
     
     // Save login state to localStorage with expiration
-    localStorage.setItem('courierUser', username);
+    localStorage.setItem('courierUser', JSON.stringify(userObj));
     
     // Set expiration time: end of today if remember me, otherwise 8 hours
     let expirationTime;

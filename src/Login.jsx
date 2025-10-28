@@ -35,14 +35,16 @@ export default function Login({ onLogin }) {
 
     // Simulate API call delay
     setTimeout(() => {
-      // Simple authentication check with multiple users
+      // Enhanced authentication with user roles and courier IDs
       const validUsers = [
-        { username: 'admin', password: 'courier123', displayName: 'Administrator' },
-        { username: 'manager', password: 'manager456', displayName: 'Manager' },
-        { username: 'supervisor', password: 'super789', displayName: 'Supervisor' },
-        { username: 'john.doe', password: 'john123', displayName: 'John Doe' },
-        { username: 'sarah.wilson', password: 'sarah456', displayName: 'Sarah Wilson' },
-        { username: 'mike.smith', password: 'mike789', displayName: 'Mike Smith' },
+        { username: 'admin', password: 'courier123', displayName: 'Administrator', role: 'admin', courierId: null },
+        { username: 'manager', password: 'manager456', displayName: 'Manager', role: 'manager', courierId: null },
+        { username: 'supervisor', password: 'super789', displayName: 'Supervisor', role: 'supervisor', courierId: null },
+        { username: 'john.doe', password: 'john123', displayName: 'John D.', role: 'courier', courierId: 'JD' },
+        { username: 'amanda.l', password: 'amanda456', displayName: 'Amanda L.', role: 'courier', courierId: 'AL' },
+        { username: 'mike.smith', password: 'mike789', displayName: 'Mike S.', role: 'courier', courierId: 'MS' },
+        { username: 'lisa.h', password: 'lisa456', displayName: 'Lisa H.', role: 'courier', courierId: 'LH' },
+        { username: 'tom.r', password: 'tom123', displayName: 'Tom R.', role: 'courier', courierId: 'TR' },
       ];
 
       // Check if the entered credentials match any valid user
@@ -51,8 +53,8 @@ export default function Login({ onLogin }) {
       );
 
       if (authenticatedUser) {
-        // Pass both user info and remember me preference
-        onLogin(authenticatedUser.displayName, rememberMe);
+        // Pass complete user info and remember me preference
+        onLogin(authenticatedUser, rememberMe);
       } else {
         setError('Invalid username or password');
       }
@@ -116,11 +118,13 @@ export default function Login({ onLogin }) {
                 />
               </div>
 
+              {/* Password Label moved between inputs */}
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 text-center -mt-2">
+                Security Password
+              </label>
+
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Security Password
-                </label>
                 <div className="relative">
                   <input
                     id="password"
@@ -130,7 +134,7 @@ export default function Login({ onLogin }) {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="appearance-none relative block w-full px-4 py-3 pr-12 border-2 border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all sm:text-sm font-medium"
+                    className="password-input appearance-none relative block w-full px-4 py-3 pr-12 border-2 border-gray-200 placeholder-gray-400 text-gray-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all sm:text-sm font-medium"
                     placeholder="Enter your secure password"
                   />
                   <button
@@ -149,7 +153,7 @@ export default function Login({ onLogin }) {
             </div>
 
             {/* Remember Me Checkbox */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mt-3 md:mt-4">
               <div className="flex items-center">
                 <input
                   id="remember-me"
@@ -186,7 +190,7 @@ export default function Login({ onLogin }) {
             )}
 
             {/* Enhanced Submit Button */}
-            <div>
+            <div className="mt-8 md:mt-10">
               <motion.button
                 type="submit"
                 disabled={isLoading}

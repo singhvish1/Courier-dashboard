@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MapPin, BarChart3, Users, Truck, LogOut } from "lucide-react";
 import { 
   BarChart, 
@@ -16,8 +16,64 @@ import {
   Legend
 } from 'recharts';
 
+// Static mock data hoisted to module scope to avoid recreating on each render
+const ALL_ROUTE_DATA = [
+  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 1, address: "123 Main St", compliance: "Off Route" },
+  { date: "10/16/25", courierId: "AL", courierName: "Amanda L.", route: "R202", stop: 3, address: "456 Oak Ave", compliance: "✓ On Route" },
+  { date: "10/16/25", courierId: "MS", courierName: "Mike S.", route: "R303", stop: 7, address: "789 Pine Rd", compliance: "✓ On Route" },
+  { date: "10/16/25", courierId: "LH", courierName: "Lisa H.", route: "R404", stop: 2, address: "321 Elm St", compliance: "✓ On Route" },
+];
+
+const ALL_SCAN_DATA = [
+  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 12, address: "123 Main St, City", tracking: "1Z999AA1234567890", scanType: "POD", distance: 180, compliance: "✓ Compliant" },
+  { date: "10/16/25", courierId: "AL", courierName: "Amanda L.", route: "R202", stop: 8, address: "456 Oak Ave, City", tracking: "1Z999AA1234567891", scanType: "PUP", distance: 290, compliance: "✗ Non-compliant" },
+  { date: "10/16/25", courierId: "MS", courierName: "Mike S.", route: "R303", stop: 15, address: "789 Pine Rd, City", tracking: "1Z999AA1234567892", scanType: "DDEX", distance: 45, compliance: "✓ Compliant" },
+  { date: "10/16/25", courierId: "LH", courierName: "Lisa H.", route: "R404", stop: 22, address: "321 Elm St, City", tracking: "1Z999AA1234567893", scanType: "DEX", distance: 310, compliance: "✗ Non-compliant" },
+];
+
 export default function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('route');
+  
+  // Extract user properties with fallbacks for backward compatibility
+  const userName = user?.displayName || user || 'User';
+  const userRole = user?.role || 'admin';
+  const courierId = user?.courierId || null;
+  const isCourier = userRole === 'courier';
+  
+  // Memoized KPI data based on user role
+  const kpiData = useMemo(() => (
+    isCourier
+      ? [
+          { label: "My Route Compliance", value: "95%", icon: BarChart3, bgGradient: "from-green-500 to-green-600" },
+          { label: "My Scan Compliance", value: "92%", icon: MapPin, bgGradient: "from-blue-500 to-blue-600" },
+          { label: "My Stops / Hr", value: "12.4", icon: Truck, bgGradient: "from-orange-500 to-orange-600" },
+          { label: "My Status", value: "Active", icon: Users, bgGradient: "from-purple-500 to-purple-600" },
+        ]
+    : [
+          { label: "Route Compliance", value: "92%", icon: BarChart3, bgGradient: "from-green-500 to-green-600" },
+          { label: "Scan Compliance", value: "88%", icon: MapPin, bgGradient: "from-blue-500 to-blue-600" },
+          { label: "Average Stops / Hr", value: "11.2", icon: Truck, bgGradient: "from-orange-500 to-orange-600" },
+      { label: "Active Couriers", value: "3", icon: Users, bgGradient: "from-purple-500 to-purple-600" },
+        ]
+  ), [isCourier]);
+
+  // Memoized filtered datasets
+  const { routeData, scanData } = useMemo(() => {
+    if (isCourier) {
+      return {
+        routeData: ALL_ROUTE_DATA.filter(item => item.courierId === courierId),
+        scanData: ALL_SCAN_DATA.filter(item => item.courierId === courierId)
+      };
+    }
+    return { routeData: ALL_ROUTE_DATA, scanData: ALL_SCAN_DATA };
+  }, [isCourier, courierId]);
+
+  // Derived counts for summaries
+  const routeCompliantCount = useMemo(() => routeData.filter(r => r.compliance.includes('✓')).length, [routeData]);
+  const routeNoncompliantCount = routeData.length - routeCompliantCount;
+  const scanCompliantCount = useMemo(() => scanData.filter(s => s.compliance.includes('✓')).length, [scanData]);
+  const scanNoncompliantCount = scanData.length - scanCompliantCount;
+  const scanComplianceRate = scanData.length > 0 ? Math.round((scanCompliantCount / scanData.length) * 100) : 0;
   
   return (
     <div className="p-6 grid gap-6 bg-gradient-to-br from-purple-50 to-orange-50 min-h-screen">
@@ -34,23 +90,29 @@ export default function Dashboard({ user, onLogout }) {
         </div>
         <div className="flex items-center gap-3">
           <div className="bg-white/10 backdrop-blur-sm px-3 py-2 rounded-lg">
-            <span className="text-white font-medium">Welcome, {user}</span>
+            <span className="text-white font-medium">Welcome, {userName}</span>
+            {isCourier && <div className="text-purple-200 text-xs">Courier {courierId}</div>}
+            {!isCourier && <div className="text-purple-200 text-xs capitalize">{userRole}</div>}
           </div>
-          <select className="px-3 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white">
-            <option className="text-black">Division</option>
-            <option className="text-black" value="surface">Surface</option>
+          <select className="px-3 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-purple-800 text-white border border-purple-400/40 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors themed-select">
+            <option>Division</option>
+            <option value="surface">Surface</option>
           </select>
-          <select className="px-3 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white">
-            <option className="text-black">Region</option>
-            <option className="text-black" value="north">North Region</option>
-            <option className="text-black" value="south">South Region</option>
-            <option className="text-black" value="east">East Region</option>
-            <option className="text-black" value="west">West Region</option>
+          <select className="px-3 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-purple-800 text-white border border-purple-400/40 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors themed-select">
+            <option>Region</option>
+            <option value="north">North Region</option>
+            <option value="south">South Region</option>
+            <option value="east">East Region</option>
+            <option value="west">West Region</option>
           </select>
-          <select className="px-3 py-2 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm text-white">
-            <option className="text-black">Location</option>
-            <option className="text-black" value="hub1">Distribution Hub 1</option>
-            <option className="text-black" value="hub2">Distribution Hub 2</option>
+          <select className="px-3 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-purple-800 text-white border border-purple-400/40 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors themed-select">
+            <option>Location</option>
+            <option value="OWDA">OWDA</option>
+            <option value="CEFA">CEFA</option>
+            <option value="NYCA">NYCA</option>
+            <option value="JRBA">JRBA</option>
+            <option value="ANCH">ANCH</option>
+            <option value="HNLR">HNLR</option>
           </select>
           <button className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold transition-colors shadow-lg">
             Export CSV
@@ -66,6 +128,19 @@ export default function Dashboard({ user, onLogout }) {
         </div>
       </header>
 
+      {/* Courier-specific view indicator */}
+      {isCourier && (
+        <div className="bg-blue-100 border-l-4 border-blue-500 p-4 rounded-lg">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-blue-700">
+                <strong>Courier View:</strong> You are viewing your individual performance metrics for Courier ID: <span className="font-semibold">{courierId}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* KPI Cards - FedEx Themed Horizontal Layout */}
       <section className="bg-white rounded-xl shadow-xl p-6 border-l-4 border-purple-800">
         <div className="mb-4">
@@ -75,12 +150,7 @@ export default function Dashboard({ user, onLogout }) {
           </h2>
         </div>
         <div className="flex items-center justify-between space-x-8">
-          {[
-            { label: "Route Compliance", value: "92%", icon: BarChart3, color: "bg-green-100 text-green-700", bgGradient: "from-green-500 to-green-600" },
-            { label: "Scan Compliance", value: "88%", icon: MapPin, color: "bg-blue-100 text-blue-700", bgGradient: "from-blue-500 to-blue-600" },
-            { label: "Average Stops / Hr", value: "11.2", icon: Truck, color: "bg-orange-100 text-orange-700", bgGradient: "from-orange-500 to-orange-600" },
-            { label: "Active Couriers", value: "27", icon: Users, color: "bg-purple-100 text-purple-700", bgGradient: "from-purple-500 to-purple-600" },
-          ].map((kpi, index) => (
+          {kpiData.map((kpi, index) => (
             <div key={kpi.label} className="flex items-center space-x-4 group hover:scale-105 transition-transform">
               <div className={`p-3 rounded-xl bg-gradient-to-br ${kpi.bgGradient} shadow-lg`}>
                 <kpi.icon className="w-6 h-6 text-white" />
@@ -170,6 +240,20 @@ export default function Dashboard({ user, onLogout }) {
               <div className="p-6 border-b">
                 <h3 className="text-lg font-semibold">Route Compliance Details</h3>
                 <p className="text-sm text-gray-500 mt-1">Monitor courier performance and route efficiency</p>
+                {isCourier && (
+                  <div className="mt-2 p-2 bg-blue-50 rounded border-l-2 border-blue-400">
+                    <p className="text-sm text-blue-700">
+                      <strong>Courier View:</strong> Showing {routeData.length} route(s) for Courier {courierId}
+                    </p>
+                  </div>
+                )}
+                {!isCourier && (
+                  <div className="mt-2 p-2 bg-gray-50 rounded border-l-2 border-gray-400">
+                    <p className="text-sm text-gray-700">
+                      <strong>Admin View:</strong> Showing {routeData.length} route(s) for all couriers
+                    </p>
+                  </div>
+                )}
               </div>
             
             {/* Route Performance Metrics Legend */}
@@ -529,6 +613,46 @@ export default function Dashboard({ user, onLogout }) {
                 </tbody>
               </table>
             </div>
+            
+            {/* Filtered Data Summary */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 mt-4 border border-blue-200">
+              <h4 className="text-md font-semibold text-gray-800 mb-2">Data Filtering Summary</h4>
+              {isCourier ? (
+                <div className="space-y-2">
+                  <p className="text-sm text-blue-700">
+                    <strong>🎯 Courier-Specific View Active</strong>
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="bg-white p-2 rounded border-l-4 border-blue-400">
+                      <span className="font-medium">Your Routes:</span> {routeData.length} routes found
+                    </div>
+                    <div className="bg-white p-2 rounded border-l-4 border-green-400">
+                      <span className="font-medium">Your Compliance:</span> {routeCompliantCount}/{routeData.length} compliant
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2">
+                    Note: Table above shows hardcoded sample data. In production, only your courier records would be displayed.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-700">
+                    <strong>👥 Administrator View - All Couriers</strong>
+                  </p>
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="bg-white p-2 rounded border-l-4 border-gray-400">
+                      <span className="font-medium">Total Routes:</span> {routeData.length} routes
+                    </div>
+                    <div className="bg-white p-2 rounded border-l-4 border-green-400">
+                      <span className="font-medium">Compliant:</span> {routeCompliantCount} routes
+                    </div>
+                    <div className="bg-white p-2 rounded border-l-4 border-red-400">
+                      <span className="font-medium">Non-compliant:</span> {routeNoncompliantCount} routes
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Route Compliance Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
@@ -671,6 +795,20 @@ export default function Dashboard({ user, onLogout }) {
               <div className="p-6 border-b">
                 <h3 className="text-lg font-semibold">Scan Compliance Details</h3>
                 <p className="text-sm text-gray-500 mt-1">Monitor scan accuracy and location compliance (250+ ft is non-compliant)</p>
+                {isCourier && (
+                  <div className="mt-2 p-2 bg-blue-50 rounded border-l-2 border-blue-400">
+                    <p className="text-sm text-blue-700">
+                      <strong>Courier View:</strong> Showing {scanData.length} scan(s) for Courier {courierId}
+                    </p>
+                  </div>
+                )}
+                {!isCourier && (
+                  <div className="mt-2 p-2 bg-gray-50 rounded border-l-2 border-gray-400">
+                    <p className="text-sm text-gray-700">
+                      <strong>Admin View:</strong> Showing {scanData.length} scan(s) for all couriers
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="p-6 overflow-x-auto">
                 <table className="w-full min-w-max">
@@ -822,6 +960,46 @@ export default function Dashboard({ user, onLogout }) {
                     </tr>
                   </tbody>
                 </table>
+              </div>
+              
+              {/* Scan Data Filtering Summary */}
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 mt-4 border border-green-200">
+                <h4 className="text-md font-semibold text-gray-800 mb-2">Scan Data Filtering Summary</h4>
+                {isCourier ? (
+                  <div className="space-y-2">
+                    <p className="text-sm text-green-700">
+                      <strong>🎯 Your Scan Records Only</strong>
+                    </p>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="bg-white p-2 rounded border-l-4 border-green-400">
+                        <span className="font-medium">Your Scans:</span> {scanData.length} total scans
+                      </div>
+                      <div className="bg-white p-2 rounded border-l-4 border-blue-400">
+                        <span className="font-medium">Compliance Rate:</span> {scanComplianceRate}%
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      Note: Table above shows hardcoded sample data. In production, only your scan records would be displayed.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-700">
+                      <strong>👥 Administrator View - All Courier Scans</strong>
+                    </p>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="bg-white p-2 rounded border-l-4 border-gray-400">
+                        <span className="font-medium">Total Scans:</span> {scanData.length} scans
+                      </div>
+                      <div className="bg-white p-2 rounded border-l-4 border-green-400">
+                        <span className="font-medium">Compliant:</span> {scanCompliantCount} scans
+                      </div>
+                      <div className="bg-white p-2 rounded border-l-4 border-red-400">
+                        <span className="font-medium">Non-compliant:</span> {scanNoncompliantCount} scans
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Scan Compliance Charts */}

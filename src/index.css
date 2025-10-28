@@ -15,3 +15,39 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+/* Themed select options (best-effort; native selects have limited styling) */
+.themed-select option {
+  color: #1f2937; /* gray-800 for readability */
+  background: #ffffff; /* white default */
+}
+.themed-select option:checked {
+  color: #ffffff;
+  background: #6d28d9; /* purple-700 */
+}
+.themed-select option:hover {
+  background: #f3e8ff; /* purple-100 */
+}
+
+/* Windows/Chrome often ignores option hover; provide focus style on select */
+.themed-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #fb923c; /* orange-400 ring */
+  border-color: #fb923c;
+}
+
+/* Hide native password reveal/clear icons so only custom toggle shows */
+.password-input::-ms-reveal,
+.password-input::-ms-clear {
+  display: none;
+}
+.password-input::-webkit-contacts-auto-fill-button,
+.password-input::-webkit-credentials-auto-fill-button,
+.password-input::-webkit-clear-button,
+.password-input::-webkit-inner-spin-button,
+.password-input::-webkit-outer-spin-button,
+.password-input::-webkit-search-cancel-button,
+.password-input::-webkit-textfield-decoration-container,
+.password-input::-webkit-caps-lock-indicator,
+.password-input::-webkit-password-value {
+  display: none !important;
+}
