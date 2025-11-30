@@ -11,6 +11,8 @@ function App() {
   useEffect(() => {
     const savedUser = localStorage.getItem('courierUser');
     const savedExpiration = localStorage.getItem('courierUserExpiration');
+  // Also support the Login component's remember-me storage key
+  const savedSession = localStorage.getItem('fedex_login_session');
     
     if (savedUser && savedExpiration) {
       const now = new Date().getTime();
@@ -31,6 +33,18 @@ function App() {
         // Session expired, clear storage
         localStorage.removeItem('courierUser');
         localStorage.removeItem('courierUserExpiration');
+      }
+    }
+
+    // If an alternative saved session exists but is expired, clean it up too
+    if (savedSession) {
+      try {
+        const { expiresAt } = JSON.parse(savedSession);
+        if (!expiresAt || Date.now() >= expiresAt) {
+          localStorage.removeItem('fedex_login_session');
+        }
+      } catch {
+        localStorage.removeItem('fedex_login_session');
       }
     }
   }, []);
@@ -62,6 +76,8 @@ function App() {
     // Remove login state and expiration from localStorage
     localStorage.removeItem('courierUser');
     localStorage.removeItem('courierUserExpiration');
+  // Remove alternative remember-me session, if any
+  localStorage.removeItem('fedex_login_session');
   };
 
   return (
