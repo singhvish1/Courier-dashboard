@@ -620,12 +620,12 @@ export default function Dashboard({ user, onLogout }) {
                       { name: 'Mike S.', planned: 13.2, actual: 14.1, variance: 0.9 }
                     ]}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" tick={{ fill: '#374151', fontSize: 12 }} tickLine={{ stroke: '#e5e7eb' }} axisLine={{ stroke: '#e5e7eb' }} />
+                      <XAxis dataKey="name" />
                       <YAxis label={{ value: 'Stops per Hour', angle: -90, position: 'insideLeft' }} />
                       <Tooltip formatter={(value, name) => [value, name === 'planned' ? 'Planned' : name === 'actual' ? 'Actual' : 'Variance']} />
                       <Legend />
-                      <Bar dataKey="planned" fill="#3b82f6" name="Planned" />
-                      <Bar dataKey="actual" fill="#10b981" name="Actual" />
+                      <Bar dataKey="planned" fill="#10b981" name="Actual" />
+                      <Bar dataKey="actual" fill="#3b82f6" name="Planned" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
