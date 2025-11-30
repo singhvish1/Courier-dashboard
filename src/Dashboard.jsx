@@ -19,45 +19,79 @@ import {
 // Static mock data hoisted to module scope to avoid recreating on each render
 const ALL_ROUTE_DATA = [
   // John D. (more entries)
-  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 1, address: "123 Main St", compliance: "✓ On Route" },
-  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 5, address: "248 River Rd", compliance: "✓ On Route" },
-  { date: "10/17/25", courierId: "JD", courierName: "John D.", route: "R118", stop: 2, address: "90 Broadway", compliance: "Off Route" },
-  { date: "10/18/25", courierId: "JD", courierName: "John D.", route: "R118", stop: 9, address: "12 King St", compliance: "✓ On Route" },
+  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 1, address: "123 Main St", compliance: "✓ On Route", region: "north", location: "OWDA" },
+  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 5, address: "248 River Rd", compliance: "✓ On Route", region: "north", location: "OWDA" },
+  { date: "10/17/25", courierId: "JD", courierName: "John D.", route: "R118", stop: 2, address: "90 Broadway", compliance: "Off Route", region: "east", location: "NYCA" },
+  { date: "10/18/25", courierId: "JD", courierName: "John D.", route: "R118", stop: 9, address: "12 King St", compliance: "✓ On Route", region: "east", location: "NYCA" },
   // Amanda L.
-  { date: "10/16/25", courierId: "AL", courierName: "Amanda L.", route: "R202", stop: 3, address: "456 Oak Ave", compliance: "✓ On Route" },
-  { date: "10/17/25", courierId: "AL", courierName: "Amanda L.", route: "R220", stop: 11, address: "77 Willow Ln", compliance: "✓ On Route" },
+  { date: "10/16/25", courierId: "AL", courierName: "Amanda L.", route: "R202", stop: 3, address: "456 Oak Ave", compliance: "✓ On Route", region: "south", location: "CEFA" },
+  { date: "10/17/25", courierId: "AL", courierName: "Amanda L.", route: "R220", stop: 11, address: "77 Willow Ln", compliance: "✓ On Route", region: "south", location: "CEFA" },
   // Mike S.
-  { date: "10/16/25", courierId: "MS", courierName: "Mike S.", route: "R303", stop: 7, address: "789 Pine Rd", compliance: "✓ On Route" },
-  { date: "10/18/25", courierId: "MS", courierName: "Mike S.", route: "R315", stop: 4, address: "5 Summit Dr", compliance: "Off Route" },
+  { date: "10/16/25", courierId: "MS", courierName: "Mike S.", route: "R303", stop: 7, address: "789 Pine Rd", compliance: "✓ On Route", region: "west", location: "JRBA" },
+  { date: "10/18/25", courierId: "MS", courierName: "Mike S.", route: "R315", stop: 4, address: "5 Summit Dr", compliance: "Off Route", region: "west", location: "JRBA" },
   // Lisa H.
-  { date: "10/16/25", courierId: "LH", courierName: "Lisa H.", route: "R404", stop: 2, address: "321 Elm St", compliance: "✓ On Route" },
-  { date: "10/17/25", courierId: "LH", courierName: "Lisa H.", route: "R410", stop: 13, address: "200 Lakeview Blvd", compliance: "✓ On Route" },
+  { date: "10/16/25", courierId: "LH", courierName: "Lisa H.", route: "R404", stop: 2, address: "321 Elm St", compliance: "✓ On Route", region: "north", location: "ANCH" },
+  { date: "10/17/25", courierId: "LH", courierName: "Lisa H.", route: "R410", stop: 13, address: "200 Lakeview Blvd", compliance: "✓ On Route", region: "north", location: "ANCH" },
   // Tom R.
-  { date: "10/16/25", courierId: "TR", courierName: "Tom R.", route: "R505", stop: 7, address: "654 Maple Dr", compliance: "✓ On Route" },
-  { date: "10/18/25", courierId: "TR", courierName: "Tom R.", route: "R512", stop: 16, address: "801 Cedar Ct", compliance: "Off Route" },
+  { date: "10/16/25", courierId: "TR", courierName: "Tom R.", route: "R505", stop: 7, address: "654 Maple Dr", compliance: "✓ On Route", region: "east", location: "HNLR" },
+  { date: "10/18/25", courierId: "TR", courierName: "Tom R.", route: "R512", stop: 16, address: "801 Cedar Ct", compliance: "Off Route", region: "east", location: "HNLR" },
+  // Additional synthetic data to cover gaps per region/location
+  { date: "10/19/25", courierId: "JD", courierName: "John D.", route: "R130", stop: 3, address: "19 Market Sq", compliance: "✓ On Route", region: "north", location: "ANCH" },
+  { date: "10/19/25", courierId: "AL", courierName: "Amanda L.", route: "R230", stop: 6, address: "502 Harbor Way", compliance: "Off Route", region: "south", location: "CEFA" },
+  { date: "10/19/25", courierId: "MS", courierName: "Mike S.", route: "R340", stop: 2, address: "77 Ridge Rd", compliance: "✓ On Route", region: "west", location: "JRBA" },
+  { date: "10/19/25", courierId: "LH", courierName: "Lisa H.", route: "R420", stop: 8, address: "610 Crescent Ave", compliance: "Off Route", region: "north", location: "OWDA" },
+  { date: "10/19/25", courierId: "TR", courierName: "Tom R.", route: "R520", stop: 5, address: "14 Valley Loop", compliance: "✓ On Route", region: "east", location: "NYCA" },
+  { date: "10/20/25", courierId: "JD", courierName: "John D.", route: "R140", stop: 10, address: "900 Granite St", compliance: "Off Route", region: "east", location: "HNLR" },
+  { date: "10/20/25", courierId: "AL", courierName: "Amanda L.", route: "R240", stop: 9, address: "45 Spring Ct", compliance: "✓ On Route", region: "south", location: "CEFA" },
+  { date: "10/20/25", courierId: "MS", courierName: "Mike S.", route: "R350", stop: 11, address: "300 Ocean Blvd", compliance: "Off Route", region: "west", location: "JRBA" },
+  { date: "10/20/25", courierId: "LH", courierName: "Lisa H.", route: "R430", stop: 4, address: "72 Forest Glade", compliance: "✓ On Route", region: "north", location: "ANCH" },
+  { date: "10/20/25", courierId: "TR", courierName: "Tom R.", route: "R530", stop: 7, address: "388 Parkway Dr", compliance: "✓ On Route", region: "east", location: "NYCA" },
+  { date: "10/21/25", courierId: "JD", courierName: "John D.", route: "R150", stop: 12, address: "25 Meadow Ln", compliance: "✓ On Route", region: "north", location: "OWDA" },
+  { date: "10/21/25", courierId: "AL", courierName: "Amanda L.", route: "R250", stop: 1, address: "810 Cypress St", compliance: "✓ On Route", region: "south", location: "CEFA" },
+  { date: "10/21/25", courierId: "MS", courierName: "Mike S.", route: "R360", stop: 4, address: "501 Sunset Dr", compliance: "✓ On Route", region: "west", location: "JRBA" },
+  { date: "10/21/25", courierId: "LH", courierName: "Lisa H.", route: "R440", stop: 6, address: "77 Birch Hollow", compliance: "Off Route", region: "north", location: "ANCH" },
+  { date: "10/21/25", courierId: "TR", courierName: "Tom R.", route: "R540", stop: 13, address: "211 Creek Bend", compliance: "Off Route", region: "east", location: "HNLR" },
 ];
 
 const ALL_SCAN_DATA = [
   // John D. (more entries)
-  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 12, address: "123 Main St, City", tracking: "1Z999AA1234567890", scanType: "POD", distance: 180, compliance: "✓ Compliant" },
-  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 18, address: "987 Cedar Ln, City", tracking: "1Z999AA1234567895", scanType: "POD", distance: 240, compliance: "✓ Compliant" },
-  { date: "10/17/25", courierId: "JD", courierName: "John D.", route: "R118", stop: 4, address: "22 Birch St, City", tracking: "1Z999AA1234567800", scanType: "PUP", distance: 275, compliance: "✗ Non-compliant" },
+  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 12, address: "123 Main St, City", tracking: "1Z999AA1234567890", scanType: "POD", distance: 180, compliance: "✓ Compliant", region: "north", location: "OWDA" },
+  { date: "10/16/25", courierId: "JD", courierName: "John D.", route: "R101", stop: 18, address: "987 Cedar Ln, City", tracking: "1Z999AA1234567895", scanType: "POD", distance: 240, compliance: "✓ Compliant", region: "north", location: "OWDA" },
+  { date: "10/17/25", courierId: "JD", courierName: "John D.", route: "R118", stop: 4, address: "22 Birch St, City", tracking: "1Z999AA1234567800", scanType: "PUP", distance: 275, compliance: "✗ Non-compliant", region: "east", location: "NYCA" },
   // Amanda L.
-  { date: "10/16/25", courierId: "AL", courierName: "Amanda L.", route: "R202", stop: 8, address: "456 Oak Ave, City", tracking: "1Z999AA1234567891", scanType: "PUP", distance: 95, compliance: "✓ Compliant" },
-  { date: "10/17/25", courierId: "AL", courierName: "Amanda L.", route: "R220", stop: 15, address: "456 Oak Ave, City", tracking: "1Z999AA1234567811", scanType: "DDEX", distance: 45, compliance: "✓ Compliant" },
+  { date: "10/16/25", courierId: "AL", courierName: "Amanda L.", route: "R202", stop: 8, address: "456 Oak Ave, City", tracking: "1Z999AA1234567891", scanType: "PUP", distance: 95, compliance: "✓ Compliant", region: "south", location: "CEFA" },
+  { date: "10/17/25", courierId: "AL", courierName: "Amanda L.", route: "R220", stop: 15, address: "456 Oak Ave, City", tracking: "1Z999AA1234567811", scanType: "DDEX", distance: 45, compliance: "✓ Compliant", region: "south", location: "CEFA" },
   // Mike S.
-  { date: "10/16/25", courierId: "MS", courierName: "Mike S.", route: "R303", stop: 15, address: "789 Pine Rd, City", tracking: "1Z999AA1234567892", scanType: "DDEX", distance: 45, compliance: "✓ Compliant" },
-  { date: "10/18/25", courierId: "MS", courierName: "Mike S.", route: "R315", stop: 2, address: "100 Oaks Blvd, City", tracking: "1Z999AA1234567822", scanType: "DEX", distance: 310, compliance: "✗ Non-compliant" },
+  { date: "10/16/25", courierId: "MS", courierName: "Mike S.", route: "R303", stop: 15, address: "789 Pine Rd, City", tracking: "1Z999AA1234567892", scanType: "DDEX", distance: 45, compliance: "✓ Compliant", region: "west", location: "JRBA" },
+  { date: "10/18/25", courierId: "MS", courierName: "Mike S.", route: "R315", stop: 2, address: "100 Oaks Blvd, City", tracking: "1Z999AA1234567822", scanType: "DEX", distance: 310, compliance: "✗ Non-compliant", region: "west", location: "JRBA" },
   // Lisa H.
-  { date: "10/16/25", courierId: "LH", courierName: "Lisa H.", route: "R404", stop: 22, address: "321 Elm St, City", tracking: "1Z999AA1234567893", scanType: "DEX", distance: 310, compliance: "✗ Non-compliant" },
-  { date: "10/17/25", courierId: "LH", courierName: "Lisa H.", route: "R410", stop: 5, address: "210 Lakeview Blvd, City", tracking: "1Z999AA1234567833", scanType: "POD", distance: 120, compliance: "✓ Compliant" },
+  { date: "10/16/25", courierId: "LH", courierName: "Lisa H.", route: "R404", stop: 22, address: "321 Elm St, City", tracking: "1Z999AA1234567893", scanType: "DEX", distance: 310, compliance: "✗ Non-compliant", region: "north", location: "ANCH" },
+  { date: "10/17/25", courierId: "LH", courierName: "Lisa H.", route: "R410", stop: 5, address: "210 Lakeview Blvd, City", tracking: "1Z999AA1234567833", scanType: "POD", distance: 120, compliance: "✓ Compliant", region: "north", location: "ANCH" },
   // Tom R.
-  { date: "10/16/25", courierId: "TR", courierName: "Tom R.", route: "R505", stop: 7, address: "654 Maple Dr, City", tracking: "1Z999AA1234567894", scanType: "PUX", distance: 125, compliance: "✓ Compliant" },
-  { date: "10/18/25", courierId: "TR", courierName: "Tom R.", route: "R512", stop: 11, address: "801 Cedar Ct, City", tracking: "1Z999AA1234567844", scanType: "POD", distance: 260, compliance: "✗ Non-compliant" },
+  { date: "10/16/25", courierId: "TR", courierName: "Tom R.", route: "R505", stop: 7, address: "654 Maple Dr, City", tracking: "1Z999AA1234567894", scanType: "PUX", distance: 125, compliance: "✓ Compliant", region: "east", location: "HNLR" },
+  { date: "10/18/25", courierId: "TR", courierName: "Tom R.", route: "R512", stop: 11, address: "801 Cedar Ct, City", tracking: "1Z999AA1234567844", scanType: "POD", distance: 260, compliance: "✗ Non-compliant", region: "east", location: "HNLR" },
+  // Additional synthetic scan events per region/location
+  { date: "10/19/25", courierId: "JD", courierName: "John D.", route: "R130", stop: 3, address: "19 Market Sq, City", tracking: "1ZJD00000001", scanType: "POD", distance: 110, compliance: "✓ Compliant", region: "north", location: "ANCH" },
+  { date: "10/19/25", courierId: "AL", courierName: "Amanda L.", route: "R230", stop: 6, address: "502 Harbor Way, City", tracking: "1ZAL00000002", scanType: "DEX", distance: 290, compliance: "✗ Non-compliant", region: "south", location: "CEFA" },
+  { date: "10/19/25", courierId: "MS", courierName: "Mike S.", route: "R340", stop: 2, address: "77 Ridge Rd, City", tracking: "1ZMS00000003", scanType: "PUP", distance: 65, compliance: "✓ Compliant", region: "west", location: "JRBA" },
+  { date: "10/19/25", courierId: "LH", courierName: "Lisa H.", route: "R420", stop: 8, address: "610 Crescent Ave, City", tracking: "1ZLH00000004", scanType: "DEX", distance: 330, compliance: "✗ Non-compliant", region: "north", location: "OWDA" },
+  { date: "10/19/25", courierId: "TR", courierName: "Tom R.", route: "R520", stop: 5, address: "14 Valley Loop, City", tracking: "1ZTR00000005", scanType: "POD", distance: 140, compliance: "✓ Compliant", region: "east", location: "NYCA" },
+  { date: "10/20/25", courierId: "JD", courierName: "John D.", route: "R140", stop: 10, address: "900 Granite St, City", tracking: "1ZJD00000006", scanType: "PUP", distance: 205, compliance: "✓ Compliant", region: "east", location: "HNLR" },
+  { date: "10/20/25", courierId: "AL", courierName: "Amanda L.", route: "R240", stop: 9, address: "45 Spring Ct, City", tracking: "1ZAL00000007", scanType: "DDEX", distance: 55, compliance: "✓ Compliant", region: "south", location: "CEFA" },
+  { date: "10/20/25", courierId: "MS", courierName: "Mike S.", route: "R350", stop: 11, address: "300 Ocean Blvd, City", tracking: "1ZMS00000008", scanType: "DEX", distance: 280, compliance: "✗ Non-compliant", region: "west", location: "JRBA" },
+  { date: "10/20/25", courierId: "LH", courierName: "Lisa H.", route: "R430", stop: 4, address: "72 Forest Glade, City", tracking: "1ZLH00000009", scanType: "POD", distance: 90, compliance: "✓ Compliant", region: "north", location: "ANCH" },
+  { date: "10/20/25", courierId: "TR", courierName: "Tom R.", route: "R530", stop: 7, address: "388 Parkway Dr, City", tracking: "1ZTR00000010", scanType: "PUX", distance: 135, compliance: "✓ Compliant", region: "east", location: "NYCA" },
+  { date: "10/21/25", courierId: "JD", courierName: "John D.", route: "R150", stop: 12, address: "25 Meadow Ln, City", tracking: "1ZJD00000011", scanType: "POD", distance: 170, compliance: "✓ Compliant", region: "north", location: "OWDA" },
+  { date: "10/21/25", courierId: "AL", courierName: "Amanda L.", route: "R250", stop: 1, address: "810 Cypress St, City", tracking: "1ZAL00000012", scanType: "POD", distance: 250, compliance: "✓ Compliant", region: "south", location: "CEFA" },
+  { date: "10/21/25", courierId: "MS", courierName: "Mike S.", route: "R360", stop: 4, address: "501 Sunset Dr, City", tracking: "1ZMS00000013", scanType: "DDEX", distance: 40, compliance: "✓ Compliant", region: "west", location: "JRBA" },
+  { date: "10/21/25", courierId: "LH", courierName: "Lisa H.", route: "R440", stop: 6, address: "77 Birch Hollow, City", tracking: "1ZLH00000014", scanType: "DEX", distance: 320, compliance: "✗ Non-compliant", region: "north", location: "ANCH" },
+  { date: "10/21/25", courierId: "TR", courierName: "Tom R.", route: "R540", stop: 13, address: "211 Creek Bend, City", tracking: "1ZTR00000015", scanType: "POD", distance: 115, compliance: "✓ Compliant", region: "east", location: "HNLR" },
 ];
 
 export default function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('route');
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
   
   // Extract user properties with fallbacks for backward compatibility
   const userName = user?.displayName || user || 'User';
@@ -65,33 +99,23 @@ export default function Dashboard({ user, onLogout }) {
   const courierId = user?.courierId || null;
   const isCourier = userRole === 'courier';
   
-  // Memoized KPI data based on user role
-  const kpiData = useMemo(() => (
-    isCourier
-      ? [
-          { label: "My Route Compliance", value: "95%", icon: BarChart3, bgGradient: "from-green-500 to-green-600" },
-          { label: "My Scan Compliance", value: "92%", icon: MapPin, bgGradient: "from-blue-500 to-blue-600" },
-          { label: "My Stops / Hr", value: "12.4", icon: Truck, bgGradient: "from-orange-500 to-orange-600" },
-          { label: "My Status", value: "Active", icon: Users, bgGradient: "from-purple-500 to-purple-600" },
-        ]
-    : [
-          { label: "Route Compliance", value: "92%", icon: BarChart3, bgGradient: "from-green-500 to-green-600" },
-          { label: "Scan Compliance", value: "88%", icon: MapPin, bgGradient: "from-blue-500 to-blue-600" },
-          { label: "Average Stops / Hr", value: "11.2", icon: Truck, bgGradient: "from-orange-500 to-orange-600" },
-      { label: "Active Couriers", value: "3", icon: Users, bgGradient: "from-purple-500 to-purple-600" },
-        ]
-  ), [isCourier]);
+  // kpiData moved below derived counts (see later) to avoid referencing variables before initialization
 
   // Memoized filtered datasets
   const { routeData, scanData } = useMemo(() => {
-    if (isCourier) {
-      return {
-        routeData: ALL_ROUTE_DATA.filter(item => item.courierId === courierId),
-        scanData: ALL_SCAN_DATA.filter(item => item.courierId === courierId)
-      };
-    }
-    return { routeData: ALL_ROUTE_DATA, scanData: ALL_SCAN_DATA };
-  }, [isCourier, courierId]);
+    const regionFilter = selectedRegion;
+    const locationFilter = selectedLocation;
+    const applyFilters = (arr) => arr.filter(item => {
+      if (isCourier && item.courierId !== courierId) return false;
+      if (regionFilter && item.region !== regionFilter) return false;
+      if (locationFilter && item.location !== locationFilter) return false;
+      return true;
+    });
+    return {
+      routeData: applyFilters(ALL_ROUTE_DATA),
+      scanData: applyFilters(ALL_SCAN_DATA)
+    };
+  }, [isCourier, courierId, selectedRegion, selectedLocation]);
 
   // Derived counts for summaries
   const routeCompliantCount = useMemo(() => routeData.filter(r => r.compliance.includes('✓')).length, [routeData]);
@@ -99,6 +123,32 @@ export default function Dashboard({ user, onLogout }) {
   const scanCompliantCount = useMemo(() => scanData.filter(s => s.compliance.includes('✓')).length, [scanData]);
   const scanNoncompliantCount = scanData.length - scanCompliantCount;
   const scanComplianceRate = scanData.length > 0 ? Math.round((scanCompliantCount / scanData.length) * 100) : 0;
+  const activeCourierCount = useMemo(() => {
+    const ids = new Set(routeData.map(r => r.courierId));
+    return ids.size;
+  }, [routeData]);
+
+  // Dynamic KPI values based on filtered data (defined AFTER counts)
+  const kpiData = useMemo(() => {
+    const routeTotal = routeData.length;
+    const scanTotal = scanData.length;
+    const routePct = routeTotal > 0 ? Math.round((routeCompliantCount / routeTotal) * 100) : 0;
+    const scanPct = scanTotal > 0 ? Math.round((scanCompliantCount / scanTotal) * 100) : 0;
+    if (isCourier) {
+      return [
+        { label: "My Route Compliance", value: `${routePct}%`, icon: BarChart3, bgGradient: "from-green-500 to-green-600" },
+        { label: "My Scan Compliance", value: `${scanPct}%`, icon: MapPin, bgGradient: "from-blue-500 to-blue-600" },
+        { label: "My Stops / Hr", value: "12.4", icon: Truck, bgGradient: "from-orange-500 to-orange-600" },
+        { label: "My Status", value: "Active", icon: Users, bgGradient: "from-purple-500 to-purple-600" },
+      ];
+    }
+    return [
+      { label: "Route Compliance", value: `${routePct}%`, icon: BarChart3, bgGradient: "from-green-500 to-green-600" },
+      { label: "Scan Compliance", value: `${scanPct}%`, icon: MapPin, bgGradient: "from-blue-500 to-blue-600" },
+    { label: "Average Stops / Hr", value: "11.2", icon: Truck, bgGradient: "from-orange-500 to-orange-600" },
+    { label: "Active Couriers", value: String(activeCourierCount), icon: Users, bgGradient: "from-purple-500 to-purple-600" },
+    ];
+  }, [isCourier, routeCompliantCount, scanCompliantCount, routeData.length, scanData.length, activeCourierCount]);
   
   return (
     <div className="p-6 grid gap-6 bg-gradient-to-br from-purple-50 to-orange-50 min-h-screen">
@@ -123,15 +173,15 @@ export default function Dashboard({ user, onLogout }) {
             <option>Division</option>
             <option value="surface">Surface</option>
           </select>
-          <select className="px-3 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-purple-800 text-white border border-purple-400/40 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors themed-select">
-            <option>Region</option>
+          <select value={selectedRegion} onChange={(e) => setSelectedRegion(e.target.value)} className="px-3 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-purple-800 text-white border border-purple-400/40 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors themed-select">
+            <option value="">Region (All)</option>
             <option value="north">North Region</option>
             <option value="south">South Region</option>
             <option value="east">East Region</option>
             <option value="west">West Region</option>
           </select>
-          <select className="px-3 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-purple-800 text-white border border-purple-400/40 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors themed-select">
-            <option>Location</option>
+          <select value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)} className="px-3 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-purple-800 text-white border border-purple-400/40 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors themed-select">
+            <option value="">Location (All)</option>
             <option value="OWDA">OWDA</option>
             <option value="CEFA">CEFA</option>
             <option value="NYCA">NYCA</option>
@@ -222,40 +272,40 @@ export default function Dashboard({ user, onLogout }) {
                 <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full"></div>
                 Route Performance Summary
               </h3>
-              <div className="flex items-center justify-between space-x-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div className="flex items-center space-x-3 bg-green-50 p-4 rounded-xl">
                   <div className="w-4 h-4 bg-green-500 rounded-full shadow-lg"></div>
                   <div>
-                    <span className="text-sm text-gray-600">On Route:</span>
-                    <span className="ml-2 text-lg font-bold text-green-600">3 couriers (60%)</span>
+                    <span className="text-xs text-gray-600">On Route</span>
+                    <span className="block text-lg font-bold text-green-600">{routeCompliantCount} ({routeData.length > 0 ? Math.round((routeCompliantCount/routeData.length)*100) : 0}%)</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <div className="flex items-center space-x-3 bg-red-50 p-4 rounded-xl">
+                  <div className="w-4 h-4 bg-red-500 rounded-full shadow-lg"></div>
                   <div>
-                    <span className="text-sm text-gray-600">Off Route:</span>
-                    <span className="ml-2 text-lg font-bold text-red-600">2 couriers (40%)</span>
+                    <span className="text-xs text-gray-600">Off Route</span>
+                    <span className="block text-lg font-bold text-red-600">{routeNoncompliantCount} ({routeData.length > 0 ? Math.round((routeNoncompliantCount/routeData.length)*100) : 0}%)</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <div className="flex items-center space-x-3 bg-blue-50 p-4 rounded-xl">
+                  <div className="w-4 h-4 bg-blue-500 rounded-full shadow-lg"></div>
                   <div>
-                    <span className="text-sm text-gray-600">Avg Stops/Hr:</span>
-                    <span className="ml-2 text-lg font-bold text-blue-600">11.2</span>
+                    <span className="text-xs text-gray-600">Total Stops</span>
+                    <span className="block text-lg font-bold text-blue-600">{routeData.length}</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <div className="flex items-center space-x-3 bg-purple-50 p-4 rounded-xl">
+                  <div className="w-4 h-4 bg-purple-500 rounded-full shadow-lg"></div>
                   <div>
-                    <span className="text-sm text-gray-600">Time Variance:</span>
-                    <span className="ml-2 text-lg font-bold text-orange-600">+8 min</span>
+                    <span className="text-xs text-gray-600">Active Couriers</span>
+                    <span className="block text-lg font-bold text-purple-600">{activeCourierCount}</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <div className="flex items-center space-x-3 bg-orange-50 p-4 rounded-xl">
+                  <div className="w-4 h-4 bg-orange-500 rounded-full shadow-lg"></div>
                   <div>
-                    <span className="text-sm text-gray-600">Active Routes:</span>
-                    <span className="ml-2 text-lg font-bold text-purple-600">5</span>
+                    <span className="text-xs text-gray-600">Scan Compliance</span>
+                    <span className="block text-lg font-bold text-orange-600">{scanComplianceRate}%</span>
                   </div>
                 </div>
               </div>
