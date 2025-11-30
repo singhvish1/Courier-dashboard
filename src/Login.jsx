@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Truck, Eye, EyeOff, Package } from 'lucide-react';
 
@@ -11,6 +11,27 @@ export default function Login({ onLogin }) {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Auto-login if a remembered session for today exists and hasn't expired
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('fedex_login_session');
+      if (saved) {
+        const { user, expiresAt } = JSON.parse(saved);
+        const now = Date.now();
+        if (expiresAt && now < expiresAt && user) {
+          // Restore session silently
+          onLogin(user, true);
+        } else {
+          // Expired, clean up
+          localStorage.removeItem('fedex_login_session');
+        }
+      }
+    } catch {
+      // ignore JSON/storage errors
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -53,6 +74,21 @@ export default function Login({ onLogin }) {
       );
 
       if (authenticatedUser) {
+        // Persist session for today if Remember Me is checked
+        if (rememberMe) {
+          // Set expiry to end of the current local day (23:59:59)
+          const endOfDay = new Date();
+          endOfDay.setHours(23, 59, 59, 999);
+          const payload = { user: authenticatedUser, expiresAt: endOfDay.getTime() };
+          try {
+            localStorage.setItem('fedex_login_session', JSON.stringify(payload));
+          } catch {
+            // ignore storage errors
+          }
+        } else {
+          // Ensure no stale session remains
+          try { localStorage.removeItem('fedex_login_session'); } catch {}
+        }
         // Pass complete user info and remember me preference
         onLogin(authenticatedUser, rememberMe);
       } else {
