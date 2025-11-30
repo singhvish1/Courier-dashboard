@@ -11,6 +11,9 @@ export default function Login({ onLogin }) {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotInput, setForgotInput] = useState('');
+  const [forgotStatus, setForgotStatus] = useState('');
 
   // Auto-login if a remembered session for today exists and hasn't expired
   useEffect(() => {
@@ -96,6 +99,19 @@ export default function Login({ onLogin }) {
       }
       setIsLoading(false);
     }, 1000);
+  };
+
+  const handleForgotSubmit = (e) => {
+    e.preventDefault();
+    setForgotStatus('');
+    if (!forgotInput.trim()) {
+      setForgotStatus('Please enter your employee ID or email');
+      return;
+    }
+    // Simulate sending reset link
+    setTimeout(() => {
+      setForgotStatus('A secure reset link has been sent if the account exists. Please check your inbox.');
+    }, 600);
   };
 
   return (
@@ -204,7 +220,8 @@ export default function Login({ onLogin }) {
                 </label>
               </div>
               <button 
-                onClick={() => {/* Handle forgot password */}} 
+                type="button"
+                onClick={() => { setShowForgot(true); setForgotStatus(''); }} 
                 className="text-sm text-purple-600 hover:text-purple-800 font-medium"
               >
                 Forgot password?
@@ -258,6 +275,43 @@ export default function Login({ onLogin }) {
               </p>
             </div>
           </motion.form>
+
+          {/* Forgot Password Modal */}
+          {showForgot && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                <h3 className="text-lg font-bold text-gray-800">Reset Password</h3>
+                <p className="text-sm text-gray-600 mt-1">Enter your employee ID or email to receive a secure reset link.</p>
+                <form onSubmit={handleForgotSubmit} className="mt-4 space-y-4">
+                  <input
+                    type="text"
+                    value={forgotInput}
+                    onChange={(e) => setForgotInput(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    placeholder="employee@fedex.com or employee ID"
+                  />
+                  {forgotStatus && (
+                    <div className="text-xs p-2 rounded bg-purple-50 text-purple-700 border border-purple-200">{forgotStatus}</div>
+                  )}
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      type="button"
+                      className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      onClick={() => { setShowForgot(false); setForgotInput(''); setForgotStatus(''); }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+                    >
+                      Send Reset Link
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
