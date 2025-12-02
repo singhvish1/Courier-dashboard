@@ -98,6 +98,9 @@ export default function Dashboard({ user, onLogout }) {
   const [scanModalOpen, setScanModalOpen] = useState(false);
   const [scanModalBin, setScanModalBin] = useState('');
   const [scanModalItems, setScanModalItems] = useState([]);
+  const [routeModalOpen, setRouteModalOpen] = useState(false);
+  const [routeModalSegment, setRouteModalSegment] = useState('');
+  const [routeModalItems, setRouteModalItems] = useState([]);
 
   useEffect(() => {
   const handler = () => setIsMobile(window.innerWidth < 640);
@@ -233,9 +236,6 @@ export default function Dashboard({ user, onLogout }) {
             <option value="ANCH">ANCH</option>
             <option value="HNLR">HNLR</option>
           </select>
-          <button className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-semibold transition-colors shadow-lg">
-            Export CSV
-          </button>
           <button 
             onClick={onLogout}
             className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2 transition-colors shadow-lg"
@@ -667,8 +667,8 @@ export default function Dashboard({ user, onLogout }) {
                       <YAxis label={{ value: 'Stops per Hour', angle: -90, position: 'insideLeft' }} />
                       <Tooltip formatter={(value, name) => [value, name === 'planned' ? 'Planned' : name === 'actual' ? 'Actual' : 'Variance']} />
                       <Legend />
-                      <Bar dataKey="planned" fill="#10b981" name="Planned" />
-                      <Bar dataKey="actual" fill="#3b82f6" name="Actual" />
+                      <Bar dataKey="planned" fill="#10b981" name="Actual" />
+                      <Bar dataKey="actual" fill="#3b82f6" name="Planned" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -680,14 +680,31 @@ export default function Dashboard({ user, onLogout }) {
                     <PieChart>
                       <Pie
                         data={[
-                          { name: 'On Route', value: 2, color: '#10b981' },
-                          { name: 'Off Route', value: 1, color: '#f59e0b' }
+                          { name: 'On Route', value: routeCompliantCount, color: '#10b981' },
+                          { name: 'Off Route', value: routeNoncompliantCount, color: '#f59e0b' }
                         ]}
                         cx="50%"
                         cy="50%"
                         outerRadius={100}
                         dataKey="value"
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        onClick={(data) => {
+                          const segment = data?.name || '';
+                          const isCompliant = segment === 'On Route';
+                          const items = routeData.filter(r => r.compliance.includes('✓') === isCompliant).map(r => ({
+                            courierName: r.courierName,
+                            date: r.date,
+                            route: r.route,
+                            stop: r.stop,
+                            address: r.address,
+                            region: r.region,
+                            location: r.location,
+                            compliance: r.compliance,
+                          }));
+                          setRouteModalSegment(segment);
+                          setRouteModalItems(items);
+                          setRouteModalOpen(true);
+                        }}
                       >
                         <Cell fill="#10b981" />
                         <Cell fill="#f59e0b" />
@@ -1012,10 +1029,10 @@ export default function Dashboard({ user, onLogout }) {
                     <h4 className="text-lg font-semibold mb-4">Scan Distance Distribution</h4>
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={[
-                        { range: '0-100ft', count: 2, compliance: 'Compliant' },
-                        { range: '100-200ft', count: 2, compliance: 'Compliant' },
-                        { range: '200-250ft', count: 1, compliance: 'Compliant' },
-                        { range: '250ft+', count: 1, compliance: 'Non-compliant' }
+                        { range: '0-100ft', count: 7, compliance: 'Compliant' },
+                        { range: '100-200ft', count: 8, compliance: 'Compliant' },
+                        { range: '200-250ft', count: 2, compliance: 'Compliant' },
+                        { range: '250ft+', count: 9, compliance: 'Non-compliant' }
                       ]}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="range" />
@@ -1130,6 +1147,60 @@ export default function Dashboard({ user, onLogout }) {
                         )}
                         <div className="mt-3 text-right">
                           <button onClick={() => setScanModalOpen(false)} className="px-3 py-1 bg-purple-600 text-white rounded">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {routeModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                      <div className="bg-white w-full max-w-4xl rounded-lg shadow-xl p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h5 className="text-sm font-semibold">Routes - {routeModalSegment}</h5>
+                          <button onClick={() => setRouteModalOpen(false)} className="text-gray-600 hover:text-black">✕</button>
+                        </div>
+                        {routeModalItems.length === 0 ? (
+                          <div className="text-sm text-gray-600">No routes found.</div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-100">
+                                  <th className="p-2 text-left">Courier</th>
+                                  <th className="p-2 text-left">Date</th>
+                                  <th className="p-2 text-left">Route</th>
+                                  <th className="p-2 text-left">Stop</th>
+                                  <th className="p-2 text-left">Address</th>
+                                  <th className="p-2 text-left">Region</th>
+                                  <th className="p-2 text-left">Location</th>
+                                  <th className="p-2 text-left">Compliance</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {routeModalItems.map((it, i) => (
+                                  <tr key={i} className="border-b">
+                                    <td className="p-2">{it.courierName}</td>
+                                    <td className="p-2">{it.date}</td>
+                                    <td className="p-2">{it.route}</td>
+                                    <td className="p-2">{it.stop}</td>
+                                    <td className="p-2">{it.address}</td>
+                                    <td className="p-2">{it.region}</td>
+                                    <td className="p-2">{it.location}</td>
+                                    <td className="p-2">
+                                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                        it.compliance === 'On Route' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                      }`}>
+                                        {it.compliance}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                        <div className="mt-3 text-right">
+                          <button onClick={() => setRouteModalOpen(false)} className="px-3 py-1 bg-purple-600 text-white rounded">Close</button>
                         </div>
                       </div>
                     </div>
