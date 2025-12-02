@@ -1071,11 +1071,11 @@ export default function Dashboard({ user, onLogout }) {
                       <PieChart>
                         <Pie
                           data={[
-                            { name: 'POD (Delivery)', value: 2, color: '#10b981', key: 'POD' },
-                            { name: 'PUP (Pickup)', value: 1, color: '#3b82f6', key: 'PUP' },
-                            { name: 'DDEX (Delivered Exception)', value: 1, color: '#f59e0b', key: 'DDEX' },
-                            { name: 'DEX (Exception)', value: 1, color: '#ef4444', key: 'DEX' },
-                            { name: 'PUX (Pickup Exception)', value: 1, color: '#8b5cf6', key: 'PUX' }
+                            { name: 'POD (Delivery)', value: 10, color: '#10b981', key: 'POD' },
+                            { name: 'PUP (Pickup)', value: 4, color: '#3b82f6', key: 'PUP' },
+                            { name: 'DDEX (Delivered Exception)', value: 4, color: '#f59e0b', key: 'DDEX' },
+                            { name: 'DEX (Exception)', value: 6, color: '#ef4444', key: 'DEX' },
+                            { name: 'PUX (Pickup Exception)', value: 2, color: '#8b5cf6', key: 'PUX' }
                           ]}
                           cx="50%"
                           cy="50%"
