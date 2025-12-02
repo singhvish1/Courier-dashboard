@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { MapPin, BarChart3, Users, Truck, LogOut } from "lucide-react";
 import { 
   BarChart, 
@@ -15,6 +15,7 @@ import {
   Line,
   Legend
 } from 'recharts';
+import MobileDashboard from './MobileDashboard';
 
 // Static mock data hoisted to module scope to avoid recreating on each render
 const ALL_ROUTE_DATA = [
@@ -92,6 +93,18 @@ export default function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('route');
   const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+  const [forceMobile, setForceMobile] = useState(false);
+  const [scanModalOpen, setScanModalOpen] = useState(false);
+  const [scanModalBin, setScanModalBin] = useState('');
+  const [scanModalItems, setScanModalItems] = useState([]);
+
+  useEffect(() => {
+  const handler = () => setIsMobile(window.innerWidth < 640);
+    handler();
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
   
   // Extract user properties with fallbacks for backward compatibility
   const userName = user?.displayName || user || 'User';
@@ -150,6 +163,34 @@ export default function Dashboard({ user, onLogout }) {
     ];
   }, [isCourier, routeCompliantCount, scanCompliantCount, routeData.length, scanData.length, activeCourierCount]);
   
+  const useMobile = forceMobile || isMobile;
+  if (useMobile) {
+    return (
+      <div className="min-h-screen flex items-start sm:items-center justify-center bg-gradient-to-br from-purple-50 to-orange-50 p-4">
+        <div className="w-full max-w-[700px] rounded-2xl border border-gray-200 shadow-2xl overflow-hidden bg-white">
+          <MobileDashboard
+        userName={userName}
+        isCourier={isCourier}
+        courierId={courierId}
+        selectedRegion={selectedRegion}
+        selectedLocation={selectedLocation}
+        setSelectedRegion={setSelectedRegion}
+        setSelectedLocation={setSelectedLocation}
+        kpiData={kpiData}
+        routeData={routeData}
+        scanData={scanData}
+        routeCompliantCount={routeCompliantCount}
+        routeNoncompliantCount={routeNoncompliantCount}
+        scanCompliantCount={scanCompliantCount}
+        scanNoncompliantCount={scanNoncompliantCount}
+  onLogout={onLogout}
+  onExitMobile={() => setForceMobile(false)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 grid gap-6 bg-gradient-to-br from-purple-50 to-orange-50 min-h-screen">
       {/* Header Section - FedEx Themed */}
@@ -169,6 +210,9 @@ export default function Dashboard({ user, onLogout }) {
             {isCourier && <div className="text-purple-200 text-xs">Courier {courierId}</div>}
             {!isCourier && <div className="text-purple-200 text-xs capitalize">{userRole}</div>}
           </div>
+          <button onClick={() => setForceMobile(f => !f)} className="px-3 py-2 rounded-lg bg-orange-600 text-white border border-orange-400/40 hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-colors" title="Toggle Mobile View">
+            {forceMobile ? 'Switch to Web View' : 'Switch to Mobile View'}
+          </button>
           <select className="px-3 py-2 rounded-lg bg-gradient-to-r from-purple-700 to-purple-800 text-white border border-purple-400/40 hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors themed-select">
             <option>Division</option>
             <option value="surface">Surface</option>
@@ -559,9 +603,8 @@ export default function Dashboard({ user, onLogout }) {
                                 )}
                               </td>
                             </tr>
-                          );
-                        })
-                      )}
+                        );
+                      }))}
                     </tbody>
                   </table>
                 </div>
@@ -624,8 +667,8 @@ export default function Dashboard({ user, onLogout }) {
                       <YAxis label={{ value: 'Stops per Hour', angle: -90, position: 'insideLeft' }} />
                       <Tooltip formatter={(value, name) => [value, name === 'planned' ? 'Planned' : name === 'actual' ? 'Actual' : 'Variance']} />
                       <Legend />
-                      <Bar dataKey="planned" fill="#10b981" name="Actual" />
-                      <Bar dataKey="actual" fill="#3b82f6" name="Planned" />
+                      <Bar dataKey="planned" fill="#10b981" name="Planned" />
+                      <Bar dataKey="actual" fill="#3b82f6" name="Actual" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -978,7 +1021,28 @@ export default function Dashboard({ user, onLogout }) {
                         <XAxis dataKey="range" />
                         <YAxis label={{ value: 'Number of Scans', angle: -90, position: 'insideLeft' }} />
                         <Tooltip formatter={(value, name) => [value, 'Scan Count']} />
-                        <Bar dataKey="count" fill="#3b82f6" />
+                        <Bar dataKey="count" fill="#3b82f6" onClick={(data) => {
+                          const bin = data?.activePayload?.[0]?.payload?.range || data?.payload?.range || '';
+                          const inBin = (d) => {
+                            const dist = Number(d.distance);
+                            if (bin === '0-100ft') return dist >= 0 && dist < 100;
+                            if (bin === '100-200ft') return dist >= 100 && dist < 200;
+                            if (bin === '200-250ft') return dist >= 200 && dist < 250;
+                            if (bin === '250ft+') return dist >= 250;
+                            return false;
+                          };
+                          const items = scanData.filter(inBin).map(s => ({
+                            courierName: s.courierName,
+                            tracking: s.tracking,
+                            scanType: s.scanType,
+                            distance: s.distance,
+                            date: s.date,
+                            route: s.route,
+                          }));
+                          setScanModalBin(bin);
+                          setScanModalItems(items);
+                          setScanModalOpen(true);
+                        }} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -990,17 +1054,32 @@ export default function Dashboard({ user, onLogout }) {
                       <PieChart>
                         <Pie
                           data={[
-                            { name: 'POD (Delivery)', value: 2, color: '#10b981' },
-                            { name: 'PUP (Pickup)', value: 1, color: '#3b82f6' },
-                            { name: 'DDEX (Delivered Exception)', value: 1, color: '#f59e0b' },
-                            { name: 'DEX (Exception)', value: 1, color: '#ef4444' },
-                            { name: 'PUX (Pickup Exception)', value: 1, color: '#8b5cf6' }
+                            { name: 'POD (Delivery)', value: 2, color: '#10b981', key: 'POD' },
+                            { name: 'PUP (Pickup)', value: 1, color: '#3b82f6', key: 'PUP' },
+                            { name: 'DDEX (Delivered Exception)', value: 1, color: '#f59e0b', key: 'DDEX' },
+                            { name: 'DEX (Exception)', value: 1, color: '#ef4444', key: 'DEX' },
+                            { name: 'PUX (Pickup Exception)', value: 1, color: '#8b5cf6', key: 'PUX' }
                           ]}
                           cx="50%"
                           cy="50%"
                           outerRadius={80}
                           dataKey="value"
                           label={({ name, percent }) => `${name.split('(')[0]} ${(percent * 100).toFixed(0)}%`}
+                          onClick={(data) => {
+                            const payload = data?.activePayload?.[0]?.payload || data?.payload;
+                            const key = payload?.key || '';
+                            const items = scanData.filter(s => s.scanType === key).map(s => ({
+                              courierName: s.courierName,
+                              tracking: s.tracking,
+                              scanType: s.scanType,
+                              distance: s.distance,
+                              date: s.date,
+                              route: s.route,
+                            }));
+                            setScanModalBin(`${payload?.name || key}`);
+                            setScanModalItems(items);
+                            setScanModalOpen(true);
+                          }}
                         >
                           <Cell fill="#10b981" />
                           <Cell fill="#3b82f6" />
@@ -1012,6 +1091,49 @@ export default function Dashboard({ user, onLogout }) {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
+                  {scanModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                      <div className="bg-white w-full max-w-xl rounded-lg shadow-xl p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h5 className="text-sm font-semibold">Scans in {scanModalBin}</h5>
+                          <button onClick={() => setScanModalOpen(false)} className="text-gray-600 hover:text-black">✕</button>
+                        </div>
+                        {scanModalItems.length === 0 ? (
+                          <div className="text-sm text-gray-600">No scans found.</div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className="bg-gray-100">
+                                  <th className="p-2 text-left">Courier</th>
+                                  <th className="p-2 text-left">Date</th>
+                                  <th className="p-2 text-left">Route</th>
+                                  <th className="p-2 text-left">Tracking</th>
+                                  <th className="p-2 text-left">Type</th>
+                                  <th className="p-2 text-left">Distance</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {scanModalItems.map((it, i) => (
+                                  <tr key={i} className="border-b">
+                                    <td className="p-2">{it.courierName}</td>
+                                    <td className="p-2">{it.date}</td>
+                                    <td className="p-2">{it.route}</td>
+                                    <td className="p-2 font-mono">{it.tracking}</td>
+                                    <td className="p-2">{it.scanType}</td>
+                                    <td className="p-2">{it.distance} ft</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                        <div className="mt-3 text-right">
+                          <button onClick={() => setScanModalOpen(false)} className="px-3 py-1 bg-purple-600 text-white rounded">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Courier Scan Performance */}
                   <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
