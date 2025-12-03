@@ -16,6 +16,8 @@ export default function MobileDashboard({
   routeNoncompliantCount,
   scanCompliantCount,
   scanNoncompliantCount,
+  activeCourierCount,
+  scanComplianceRate,
   onLogout,
   onExitMobile,
 }) {
@@ -74,8 +76,13 @@ export default function MobileDashboard({
       <section className="grid grid-cols-2 gap-2">
         {kpiData.map((k) => (
           <div key={k.label} className="bg-white rounded-lg shadow p-3">
-            <div className="text-xs text-gray-500">{k.label}</div>
-            <div className="text-lg font-bold">{k.value}</div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`p-2 rounded-lg bg-gradient-to-br ${k.bgGradient} shadow`}>
+                <k.icon className="w-4 h-4 text-white" />
+              </div>
+              <div className="text-xs text-gray-500 font-medium">{k.label}</div>
+            </div>
+            <div className="text-lg font-bold ml-10">{k.value}</div>
           </div>
         ))}
       </section>
@@ -88,6 +95,44 @@ export default function MobileDashboard({
         </div>
         {activeTab === 'route' ? (
           <div key={activeTab}>
+            {/* Route Performance Summary */}
+            <div className="bg-white rounded-lg shadow p-3 mb-3 border-l-4 border-purple-600">
+              <h3 className="text-sm font-semibold mb-3 text-gray-800 flex items-center gap-2">
+                <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full"></div>
+                Route Performance Summary
+              </h3>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center space-x-2 bg-green-50 p-2 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div>
+                    <div className="text-gray-600">On Route</div>
+                    <div className="font-bold text-green-600">{routeCompliantCount} ({routeData.length > 0 ? Math.round((routeCompliantCount/routeData.length)*100) : 0}%)</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 bg-red-50 p-2 rounded-lg">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <div>
+                    <div className="text-gray-600">Off Route</div>
+                    <div className="font-bold text-red-600">{routeNoncompliantCount} ({routeData.length > 0 ? Math.round((routeNoncompliantCount/routeData.length)*100) : 0}%)</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 bg-blue-50 p-2 rounded-lg">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div>
+                    <div className="text-gray-600">Total Stops</div>
+                    <div className="font-bold text-blue-600">{routeData.length}</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 bg-purple-50 p-2 rounded-lg">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <div>
+                    <div className="text-gray-600">Active Couriers</div>
+                    <div className="font-bold text-purple-600">{activeCourierCount || 0}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <h2 className="text-sm font-semibold mb-2">Routes</h2>
             <div className="overflow-x-auto -mx-3">
               <table className="w-full min-w-max text-xs">
@@ -111,7 +156,13 @@ export default function MobileDashboard({
                       <td className="p-2">{r.stop}</td>
                       <td className="p-2">{r.region}</td>
                       <td className="p-2">{r.location}</td>
-                      <td className="p-2">{r.compliance}</td>
+                      <td className="p-2">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          r.compliance.includes('On Route') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {r.compliance}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -121,9 +172,144 @@ export default function MobileDashboard({
               <span className="px-2 py-1 bg-green-100 text-green-700 rounded">On Route: {routeCompliantCount}</span>
               <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded">Off Route: {routeNoncompliantCount}</span>
             </div>
+            
+            {/* Route Data Filtering Summary */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 mt-3 border border-blue-200">
+              <h4 className="text-xs font-semibold text-gray-800 mb-2">Data Filtering Summary</h4>
+              {isCourier ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-blue-700">
+                    <strong>🎯 Courier-Specific View Active</strong>
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white p-2 rounded border-l-4 border-blue-400">
+                      <span className="font-medium">Your Routes:</span> {routeData.length} routes found
+                    </div>
+                    <div className="bg-white p-2 rounded border-l-4 border-green-400">
+                      <span className="font-medium">Your Compliance:</span> {routeCompliantCount}/{routeData.length} compliant
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-700">
+                    <strong>👥 Manager View - All Couriers</strong>
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white p-2 rounded border-l-4 border-gray-400">
+                      <span className="font-medium">Total Routes:</span> {routeData.length} routes
+                    </div>
+                    <div className="bg-white p-2 rounded border-l-4 border-green-400">
+                      <span className="font-medium">Compliant:</span> {routeCompliantCount} routes
+                    </div>
+                    <div className="bg-white p-2 rounded border-l-4 border-red-400">
+                      <span className="font-medium">Non-compliant:</span> {routeNoncompliantCount} routes
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div key={activeTab}>
+            {/* Scan Performance Summary */}
+            {!isCourier ? (
+              <div className="bg-white rounded-lg shadow p-3 mb-3">
+                <h3 className="text-sm font-semibold mb-3">Scan Performance Summary</h3>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div>
+                      <div className="text-gray-600">Compliant Scans:</div>
+                      <div className="font-bold text-green-600">18 scans (69%)</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <div>
+                      <div className="text-gray-600">Non-Compliant:</div>
+                      <div className="font-bold text-red-600">8 scans (31%)</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <div>
+                      <div className="text-gray-600">Avg Distance:</div>
+                      <div className="font-bold text-orange-600">185 ft</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div>
+                      <div className="text-gray-600">Total Scans:</div>
+                      <div className="font-bold text-blue-600">26 today</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg shadow p-3 mb-3">
+                <h3 className="text-sm font-semibold mb-3">My Scan Performance</h3>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div>
+                      <div className="text-gray-600">Compliant:</div>
+                      <div className="font-bold text-green-600">{scanCompliantCount}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <div>
+                      <div className="text-gray-600">Non-Compliant:</div>
+                      <div className="font-bold text-red-600">{scanNoncompliantCount}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div>
+                      <div className="text-gray-600">Total:</div>
+                      <div className="font-bold text-blue-600">{scanData.length}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <div>
+                      <div className="text-gray-600">Compliance Rate:</div>
+                      <div className="font-bold text-orange-600">{Math.round((scanCompliantCount / scanData.length) * 100)}%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Scan Types Reference */}
+            <div className="bg-white rounded-lg shadow p-3 mb-3">
+              <h4 className="text-xs font-semibold mb-2">Scan Types Reference</h4>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded font-mono text-[10px]">PUP</span>
+                  <span>Pickup</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded font-mono text-[10px]">PUX</span>
+                  <span>Pickup Exception</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded font-mono text-[10px]">POD</span>
+                  <span>Delivery</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded font-mono text-[10px]">DDEX</span>
+                  <span className="text-[10px]">Delivery Exception - Delivered</span>
+                </div>
+                <div className="flex items-center space-x-2 col-span-2">
+                  <span className="px-2 py-1 bg-red-100 text-red-700 rounded font-mono text-[10px]">DEX</span>
+                  <span>Delivery Exception - Not Delivered</span>
+                </div>
+              </div>
+            </div>
+
             <h2 className="text-sm font-semibold mb-2">Scans</h2>
             <div className="overflow-x-auto -mx-3">
               <table className="w-full min-w-max text-xs">
@@ -149,7 +335,13 @@ export default function MobileDashboard({
                       <td className="p-2">{s.tracking}</td>
                       <td className="p-2">{s.scanType}</td>
                       <td className="p-2">{s.distance}</td>
-                      <td className="p-2">{s.compliance}</td>
+                      <td className="p-2">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          s.compliance.includes('Compliant') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {s.compliance}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -158,6 +350,43 @@ export default function MobileDashboard({
             <div className="flex gap-2 mt-2 text-xs">
               <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded">Scan ✓: {scanCompliantCount}</span>
               <span className="px-2 py-1 bg-red-100 text-red-700 rounded">Scan ✗: {scanNoncompliantCount}</span>
+            </div>
+            
+            {/* Scan Data Filtering Summary */}
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-3 mt-3 border border-green-200">
+              <h4 className="text-xs font-semibold text-gray-800 mb-2">Scan Data Filtering Summary</h4>
+              {isCourier ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-green-700">
+                    <strong>🎯 Your Scan Records Only</strong>
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white p-2 rounded border-l-4 border-green-400">
+                      <span className="font-medium">Your Scans:</span> {scanData.length} total scans
+                    </div>
+                    <div className="bg-white p-2 rounded border-l-4 border-blue-400">
+                      <span className="font-medium">Compliance Rate:</span> {Math.round((scanCompliantCount / scanData.length) * 100)}%
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-700">
+                    <strong>👥 Manager View - All Courier Scans</strong>
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white p-2 rounded border-l-4 border-gray-400">
+                      <span className="font-medium">Total Scans:</span> {scanData.length} scans
+                    </div>
+                    <div className="bg-white p-2 rounded border-l-4 border-green-400">
+                      <span className="font-medium">Compliant:</span> {scanCompliantCount} scans
+                    </div>
+                    <div className="bg-white p-2 rounded border-l-4 border-red-400">
+                      <span className="font-medium">Non-compliant:</span> {scanNoncompliantCount} scans
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -185,8 +414,8 @@ export default function MobileDashboard({
                       const payload = data?.activePayload?.[0]?.payload || data?.payload;
                       const segment = payload?.name || '';
                       const items = routeData.filter(r => {
-                        if (segment === 'On Route') return r.compliance === 'On Route';
-                        if (segment === 'Off Route') return r.compliance === 'Off Route';
+                        if (segment === 'On Route') return r.compliance.includes('On Route');
+                        if (segment === 'Off Route') return r.compliance.includes('Off Route');
                         return false;
                       });
                       setRouteModalSegment(segment);
@@ -467,7 +696,7 @@ export default function MobileDashboard({
                         <td className="p-2">{it.location}</td>
                         <td className="p-2">
                           <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                            it.compliance === 'On Route' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            it.compliance.includes('On Route') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
                             {it.compliance}
                           </span>

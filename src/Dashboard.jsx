@@ -13,7 +13,8 @@ import {
   Cell,
   LineChart,
   Line,
-  Legend
+  Legend,
+  ComposedChart
 } from 'recharts';
 import MobileDashboard from './MobileDashboard';
 
@@ -139,10 +140,7 @@ export default function Dashboard({ user, onLogout }) {
   const scanCompliantCount = useMemo(() => scanData.filter(s => s.compliance.includes('✓')).length, [scanData]);
   const scanNoncompliantCount = scanData.length - scanCompliantCount;
   const scanComplianceRate = scanData.length > 0 ? Math.round((scanCompliantCount / scanData.length) * 100) : 0;
-  const activeCourierCount = useMemo(() => {
-    const ids = new Set(routeData.map(r => r.courierId));
-    return ids.size;
-  }, [routeData]);
+  const activeCourierCount = 5;
 
   // Dynamic KPI values based on filtered data (defined AFTER counts)
   const kpiData = useMemo(() => {
@@ -633,7 +631,7 @@ export default function Dashboard({ user, onLogout }) {
               ) : (
                 <div className="space-y-2">
                   <p className="text-sm text-gray-700">
-                    <strong>👥 Administrator View - All Couriers</strong>
+                    <strong>👥 Manager View - All Couriers</strong>
                   </p>
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div className="bg-white p-2 rounded border-l-4 border-gray-400">
@@ -689,18 +687,13 @@ export default function Dashboard({ user, onLogout }) {
                         dataKey="value"
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                         onClick={(data) => {
-                          const segment = data?.name || '';
-                          const isCompliant = segment === 'On Route';
-                          const items = routeData.filter(r => r.compliance.includes('✓') === isCompliant).map(r => ({
-                            courierName: r.courierName,
-                            date: r.date,
-                            route: r.route,
-                            stop: r.stop,
-                            address: r.address,
-                            region: r.region,
-                            location: r.location,
-                            compliance: r.compliance,
-                          }));
+                          const payload = data?.activePayload?.[0]?.payload || data?.payload;
+                          const segment = payload?.name || '';
+                          const items = routeData.filter(r => {
+                            if (segment === 'On Route') return r.compliance.includes('On Route');
+                            if (segment === 'Off Route') return r.compliance.includes('Off Route');
+                            return false;
+                          });
                           setRouteModalSegment(segment);
                           setRouteModalItems(items);
                           setRouteModalOpen(true);
@@ -778,14 +771,14 @@ export default function Dashboard({ user, onLogout }) {
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                     <div>
                       <span className="text-sm text-gray-600">Compliant Scans:</span>
-                      <span className="ml-2 text-lg font-bold text-green-600">12 scans (75%)</span>
+                      <span className="ml-2 text-lg font-bold text-green-600">18 scans (69%)</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                     <div>
                       <span className="text-sm text-gray-600">Non-Compliant:</span>
-                      <span className="ml-2 text-lg font-bold text-red-600">4 scans (25%)</span>
+                      <span className="ml-2 text-lg font-bold text-red-600">8 scans (31%)</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -799,7 +792,7 @@ export default function Dashboard({ user, onLogout }) {
                     <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                     <div>
                       <span className="text-sm text-gray-600">Total Scans:</span>
-                      <span className="ml-2 text-lg font-bold text-blue-600">16 today</span>
+                      <span className="ml-2 text-lg font-bold text-blue-600">26 today</span>
                     </div>
                   </div>
                 </div>
@@ -1005,7 +998,7 @@ export default function Dashboard({ user, onLogout }) {
                 ) : (
                   <div className="space-y-2">
                     <p className="text-sm text-gray-700">
-                      <strong>👥 Administrator View - All Courier Scans</strong>
+                      <strong>👥 Manager View - All Courier Scans</strong>
                     </p>
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div className="bg-white p-2 rounded border-l-4 border-gray-400">
@@ -1108,114 +1101,22 @@ export default function Dashboard({ user, onLogout }) {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  {scanModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                      <div className="bg-white w-full max-w-xl rounded-lg shadow-xl p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h5 className="text-sm font-semibold">Scans in {scanModalBin}</h5>
-                          <button onClick={() => setScanModalOpen(false)} className="text-gray-600 hover:text-black">✕</button>
-                        </div>
-                        {scanModalItems.length === 0 ? (
-                          <div className="text-sm text-gray-600">No scans found.</div>
-                        ) : (
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-xs">
-                              <thead>
-                                <tr className="bg-gray-100">
-                                  <th className="p-2 text-left">Courier</th>
-                                  <th className="p-2 text-left">Date</th>
-                                  <th className="p-2 text-left">Route</th>
-                                  <th className="p-2 text-left">Tracking</th>
-                                  <th className="p-2 text-left">Type</th>
-                                  <th className="p-2 text-left">Distance</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {scanModalItems.map((it, i) => (
-                                  <tr key={i} className="border-b">
-                                    <td className="p-2">{it.courierName}</td>
-                                    <td className="p-2">{it.date}</td>
-                                    <td className="p-2">{it.route}</td>
-                                    <td className="p-2 font-mono">{it.tracking}</td>
-                                    <td className="p-2">{it.scanType}</td>
-                                    <td className="p-2">{it.distance} ft</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                        <div className="mt-3 text-right">
-                          <button onClick={() => setScanModalOpen(false)} className="px-3 py-1 bg-purple-600 text-white rounded">Close</button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {routeModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                      <div className="bg-white w-full max-w-4xl rounded-lg shadow-xl p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h5 className="text-sm font-semibold">Routes - {routeModalSegment}</h5>
-                          <button onClick={() => setRouteModalOpen(false)} className="text-gray-600 hover:text-black">✕</button>
-                        </div>
-                        {routeModalItems.length === 0 ? (
-                          <div className="text-sm text-gray-600">No routes found.</div>
-                        ) : (
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-xs">
-                              <thead>
-                                <tr className="bg-gray-100">
-                                  <th className="p-2 text-left">Courier</th>
-                                  <th className="p-2 text-left">Date</th>
-                                  <th className="p-2 text-left">Route</th>
-                                  <th className="p-2 text-left">Stop</th>
-                                  <th className="p-2 text-left">Address</th>
-                                  <th className="p-2 text-left">Region</th>
-                                  <th className="p-2 text-left">Location</th>
-                                  <th className="p-2 text-left">Compliance</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {routeModalItems.map((it, i) => (
-                                  <tr key={i} className="border-b">
-                                    <td className="p-2">{it.courierName}</td>
-                                    <td className="p-2">{it.date}</td>
-                                    <td className="p-2">{it.route}</td>
-                                    <td className="p-2">{it.stop}</td>
-                                    <td className="p-2">{it.address}</td>
-                                    <td className="p-2">{it.region}</td>
-                                    <td className="p-2">{it.location}</td>
-                                    <td className="p-2">
-                                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                        it.compliance === 'On Route' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                      }`}>
-                                        {it.compliance}
-                                      </span>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                        <div className="mt-3 text-right">
-                          <button onClick={() => setRouteModalOpen(false)} className="px-3 py-1 bg-purple-600 text-white rounded">Close</button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Courier Scan Performance */}
                   <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
                     <h4 className="text-lg font-semibold mb-4">Courier Scan Performance</h4>
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={[
-                        { courier: 'John D.', compliantScans: 2, distance: 210, avgDistance: 210 },
-                        { courier: 'Mike S.', compliantScans: 1, distance: 95, avgDistance: 95 },
-                        { courier: 'Amanda L.', compliantScans: 1, distance: 45, avgDistance: 45 },
-                        { courier: 'Lisa H.', compliantScans: 0, distance: 310, avgDistance: 310 },
-                        { courier: 'Tom R.', compliantScans: 1, distance: 125, avgDistance: 125 }
+                      <ComposedChart data={[
+                        { courier: 'John D.', compliantScans: scanData.filter(s => s.courierName === 'John D.' && s.compliance === '✓ Compliant').length, 
+                          avgDistance: Math.round(scanData.filter(s => s.courierName === 'John D.').reduce((sum, s) => sum + s.distance, 0) / scanData.filter(s => s.courierName === 'John D.').length) || 0 },
+                        { courier: 'Amanda L.', compliantScans: scanData.filter(s => s.courierName === 'Amanda L.' && s.compliance === '✓ Compliant').length,
+                          avgDistance: Math.round(scanData.filter(s => s.courierName === 'Amanda L.').reduce((sum, s) => sum + s.distance, 0) / scanData.filter(s => s.courierName === 'Amanda L.').length) || 0 },
+                        { courier: 'Mike S.', compliantScans: scanData.filter(s => s.courierName === 'Mike S.' && s.compliance === '✓ Compliant').length,
+                          avgDistance: Math.round(scanData.filter(s => s.courierName === 'Mike S.').reduce((sum, s) => sum + s.distance, 0) / scanData.filter(s => s.courierName === 'Mike S.').length) || 0 },
+                        { courier: 'Lisa H.', compliantScans: scanData.filter(s => s.courierName === 'Lisa H.' && s.compliance === '✓ Compliant').length,
+                          avgDistance: Math.round(scanData.filter(s => s.courierName === 'Lisa H.').reduce((sum, s) => sum + s.distance, 0) / scanData.filter(s => s.courierName === 'Lisa H.').length) || 0 },
+                        { courier: 'Tom R.', compliantScans: scanData.filter(s => s.courierName === 'Tom R.' && s.compliance === '✓ Compliant').length,
+                          avgDistance: Math.round(scanData.filter(s => s.courierName === 'Tom R.').reduce((sum, s) => sum + s.distance, 0) / scanData.filter(s => s.courierName === 'Tom R.').length) || 0 }
                       ]}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="courier" />
@@ -1225,7 +1126,7 @@ export default function Dashboard({ user, onLogout }) {
                         <Legend />
                         <Bar yAxisId="left" dataKey="compliantScans" fill="#10b981" name="Compliant Scans" />
                         <Line yAxisId="right" type="monotone" dataKey="avgDistance" stroke="#ef4444" strokeWidth={3} name="Avg Distance (ft)" />
-                      </BarChart>
+                      </ComposedChart>
                     </ResponsiveContainer>
                   </div>
 
@@ -1282,6 +1183,106 @@ export default function Dashboard({ user, onLogout }) {
           </>
         )}
       </div>
+
+      {/* Scan Distance Modal */}
+      {scanModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white w-full max-w-xl rounded-lg shadow-xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h5 className="text-sm font-semibold">Scans in {scanModalBin}</h5>
+              <button onClick={() => setScanModalOpen(false)} className="text-gray-600 hover:text-black">✕</button>
+            </div>
+            {scanModalItems.length === 0 ? (
+              <div className="text-sm text-gray-600">No scans found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="p-2 text-left">Courier</th>
+                      <th className="p-2 text-left">Date</th>
+                      <th className="p-2 text-left">Route</th>
+                      <th className="p-2 text-left">Tracking</th>
+                      <th className="p-2 text-left">Type</th>
+                      <th className="p-2 text-left">Distance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {scanModalItems.map((it, i) => (
+                      <tr key={i} className="border-b">
+                        <td className="p-2">{it.courierName}</td>
+                        <td className="p-2">{it.date}</td>
+                        <td className="p-2">{it.route}</td>
+                        <td className="p-2 font-mono">{it.tracking}</td>
+                        <td className="p-2">{it.scanType}</td>
+                        <td className="p-2">{it.distance} ft</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="mt-3 text-right">
+              <button onClick={() => setScanModalOpen(false)} className="px-3 py-1 bg-purple-600 text-white rounded">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Route Compliance Modal */}
+      {routeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white w-full max-w-4xl rounded-lg shadow-xl p-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-2">
+              <h5 className="text-sm font-semibold">Routes - {routeModalSegment}</h5>
+              <button onClick={() => setRouteModalOpen(false)} className="text-gray-600 hover:text-black">✕</button>
+            </div>
+            {routeModalItems.length === 0 ? (
+              <div className="text-sm text-gray-600">No routes found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="p-2 text-left">Courier</th>
+                      <th className="p-2 text-left">Date</th>
+                      <th className="p-2 text-left">Route</th>
+                      <th className="p-2 text-left">Stop</th>
+                      <th className="p-2 text-left">Address</th>
+                      <th className="p-2 text-left">Region</th>
+                      <th className="p-2 text-left">Location</th>
+                      <th className="p-2 text-left">Compliance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {routeModalItems.map((it, i) => (
+                      <tr key={i} className="border-b">
+                        <td className="p-2">{it.courierName}</td>
+                        <td className="p-2">{it.date}</td>
+                        <td className="p-2">{it.route}</td>
+                        <td className="p-2">{it.stop}</td>
+                        <td className="p-2">{it.address}</td>
+                        <td className="p-2">{it.region}</td>
+                        <td className="p-2">{it.location}</td>
+                        <td className="p-2">
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                            it.compliance.includes('On Route') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {it.compliance}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="mt-3 text-right">
+              <button onClick={() => setRouteModalOpen(false)} className="px-3 py-1 bg-purple-600 text-white rounded">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
